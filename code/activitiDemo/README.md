@@ -1,0 +1,1 @@
+**这是该博文的示例代码：[ maven-activiti-spring 环境及activiti初始化](http://blog.csdn.net/jenyzhang/article/details/78165439)**
