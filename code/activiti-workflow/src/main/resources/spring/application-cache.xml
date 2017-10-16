@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:cache="http://www.springframework.org/schema/cache"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd">
+
+    <!-- ehCache 配置管理器 -->
+    <bean id="ehcacheManager" class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean">
+        <property name="configLocation" value="classpath:spring/ehcache.xml"/>
+        <!--true:单例，一个cacheManager对象共享；false：多个对象独立  -->
+        <property name="shared" value="true"/>
+        <property name="cacheManagerName" value="ehcacheManager"/>
+    </bean>
+
+    <!-- ehCache 操作对象 -->
+    <bean id="ehCache300" class="org.springframework.cache.ehcache.EhCacheFactoryBean">
+        <property name="cacheName" value="ehCache300"/>
+        <property name="cacheManager" ref="ehcacheManager"/>
+    </bean>
+    <bean id="ehCache60" class="org.springframework.cache.ehcache.EhCacheFactoryBean">
+        <property name="cacheName" value="ehCache60"/>
+        <property name="cacheManager" ref="ehcacheManager"/>
+    </bean>
+
+    <!-- 自定义ehcache+redis-->
+    <bean id="ehRedisCacheManager" class="org.springframework.cache.support.SimpleCacheManager">
+        <property name="caches">
+            <set>
+                <bean id="redisCache300" class="com.activiti.common.cache.EhRedisCache">
+                    <property name="redisTemplate" ref="redisTemplate"/>
+                    <property name="ehCache" ref="ehCache300"/>
+                    <!--ehcache存储五个小时-->
+                    <property name="name" value="ehCache300"/>
+                    <!--redis存储六个小时-->
+                    <property name="liveTime" value="21600"/>
+                </bean>
+                <bean id="redisCache60" class="com.activiti.common.cache.EhRedisCache">
+                    <property name="redisTemplate" ref="redisTemplate"/>
+                    <!--ehcache存储一个小时-->
+                    <property name="ehCache" ref="ehCache60"/>
+                    <property name="name" value="ehCache60"/>
+                    <!--redis存储两个小时-->
+                    <property name="liveTime" value="7200"/>
+                </bean>
+            </set>
+        </property>
+    </bean>
+
+    <!-- 注解声明 -->
+    <cache:annotation-driven cache-manager="ehRedisCacheManager"
+                             key-generator="keyGenerator"
+                             proxy-target-class="true"/>
+    <!--<cache:advice  id="cacheAdvice" cache-manager="ehRedisCacheManager"  key-generator="keyGenerator" />-->
+
+</beans>

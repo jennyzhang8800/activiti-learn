@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="GBK" standalone="yes"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:activiti="http://activiti.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" xmlns:tns="http://www.activiti.org/test" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" expressionLanguage="http://www.w3.org/1999/XPath" id="m1502626667148" name="" targetNamespace="http://www.activiti.org/test" typeLanguage="http://www.w3.org/2001/XMLSchema">
+  <process id="judgement" isClosed="false" isExecutable="true" name="judgement" processType="None">
+    <startEvent activiti:initiator="${userEmail}" id="startCommit" name="startCommit"/>
+    <subProcess activiti:exclusive="true" id="judgementStage" name="娴滄帟鐦庨梼鑸殿唽" triggeredByEvent="false">
+      <startEvent id="startevent1" name="Start"/>
+      <userTask activiti:assignee="${userEmail}" activiti:exclusive="true" id="judgeWork" name="娴滄帟鐦庢担婊?绗?"/>
+      <endEvent id="endevent1" name="End"/>
+      <sequenceFlow id="flow2" sourceRef="startevent1" targetRef="judgeWork"/>
+      <sequenceFlow id="flow3" sourceRef="judgeWork" targetRef="endevent1"/>
+    </subProcess>
+    <boundaryEvent attachedToRef="judgementStage" cancelActivity="true" id="judgeTimerOut" name="娴滄帟鐦庣搾鍛閸ｏ拷">
+      <timerEventDefinition id="judgeTimerOut_ED_1"/>
+    </boundaryEvent>
+    <sequenceFlow id="flow1" sourceRef="startCommit" targetRef="judgementStage"/>
+    <serviceTask activiti:exclusive="true" id="Email1" name="闁喕娆㈤幓鎰板晪閺堫亜寮崝鐘辩鞍鐠囷拷"/>
+    <sequenceFlow id="flow4" sourceRef="judgeTimerOut" targetRef="Email1"/>
+    <endEvent id="endevent3" name="End"/>
+    <sequenceFlow id="flow5" sourceRef="Email1" targetRef="endevent3"/>
+    <userTask activiti:candidateGroups="teacher" activiti:exclusive="true" id="teacherAuditing" name="閺佹瑥绗?鐎光剝鐗?"/>
+    <subProcess activiti:exclusive="true" id="studentAuditing" name="鐎涳妇鏁撻悽瀹犵様鐎涙劖绁︾粙锟?" triggeredByEvent="false">
+      <userTask activiti:assignee="${userEmail}" activiti:exclusive="true" id="Auditing" name="鐎涳妇鏁撻弻銉ф箙閸掑棙鏆?"/>
+      <startEvent id="startevent2" name="Start"/>
+      <endEvent id="endevent4" name="End"/>
+      <sequenceFlow id="flow7" sourceRef="startevent2" targetRef="Auditing"/>
+      <sequenceFlow id="flow8" sourceRef="Auditing" targetRef="endevent4"/>
+    </subProcess>
+    <sequenceFlow id="flow6" sourceRef="judgementStage" targetRef="studentAuditing"/>
+    <sequenceFlow id="flow9" sourceRef="studentAuditing" targetRef="teacherAuditing"/>
+    <endEvent id="endevent5" name="End"/>
+    <sequenceFlow id="flow10" sourceRef="teacherAuditing" targetRef="endevent5"/>
+    <boundaryEvent attachedToRef="studentAuditing" cancelActivity="true" id="boundarytimer1" name="Timer">
+      <timerEventDefinition id="boundarytimer1_ED_1"/>
+    </boundaryEvent>
+    <endEvent id="endevent6" name="End"/>
+    <sequenceFlow id="flow11" sourceRef="boundarytimer1" targetRef="endevent6"/>
+  </process>
+  <bpmndi:BPMNDiagram documentation="background=#FFFFFF;count=1;horizontalcount=1;orientation=0;width=842.4;height=1195.2;imageableWidth=832.4;imageableHeight=1185.2;imageableX=5.0;imageableY=5.0" id="Diagram-_1" name="New Diagram">
+    <bpmndi:BPMNPlane bpmnElement="judgement">
+      <bpmndi:BPMNShape bpmnElement="startCommit" id="Shape-startCommit">
+        <omgdc:Bounds height="32.0" width="32.0" x="60.0" y="220.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="32.0" width="32.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="judgementStage" id="Shape-judgementStage" isExpanded="true">
+        <omgdc:Bounds height="196.0" width="321.0" x="154.0" y="140.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="196.0" width="321.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="Email1" id="Shape-Email1">
+        <omgdc:Bounds height="71.0" width="159.0" x="235.0" y="400.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="71.0" width="159.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="endevent3" id="Shape-endevent3">
+        <omgdc:Bounds height="32.0" width="32.0" x="297.0" y="530.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="32.0" width="32.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="teacherAuditing" id="Shape-teacherAuditing">
+        <omgdc:Bounds height="81.0" width="156.0" x="618.0" y="420.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="81.0" width="156.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="studentAuditing" id="Shape-studentAuditing" isExpanded="true">
+        <omgdc:Bounds height="200.0" width="291.0" x="550.0" y="138.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="200.0" width="291.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="endevent5" id="Shape-endevent5">
+        <omgdc:Bounds height="32.0" width="32.0" x="860.0" y="443.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="32.0" width="32.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="endevent6" id="Shape-endevent6">
+        <omgdc:Bounds height="32.0" width="32.0" x="940.0" y="272.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="32.0" width="32.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="startevent1" id="Shape-startevent1">
+        <omgdc:Bounds height="32.0" width="32.0" x="174.0" y="222.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="32.0" width="32.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="judgeWork" id="Shape-judgeWork">
+        <omgdc:Bounds height="55.0" width="105.0" x="254.0" y="212.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="55.0" width="105.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="endevent1" id="Shape-endevent1">
+        <omgdc:Bounds height="32.0" width="32.0" x="404.0" y="222.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="32.0" width="32.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="judgeTimerOut" id="Shape-judgeTimerOut">
+        <omgdc:Bounds height="32.0" width="32.0" x="300.0" y="320.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="0.0" width="0.0" x="146.0" y="180.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="Auditing" id="Shape-Auditing">
+        <omgdc:Bounds height="71.0" width="121.0" x="630.0" y="205.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="71.0" width="121.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="startevent2" id="Shape-startevent2">
+        <omgdc:Bounds height="32.0" width="32.0" x="560.0" y="223.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="32.0" width="32.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="endevent4" id="Shape-endevent4">
+        <omgdc:Bounds height="32.0" width="32.0" x="790.0" y="223.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="32.0" width="32.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="boundarytimer1" id="Shape-boundarytimer1">
+        <omgdc:Bounds height="32.0" width="32.0" x="827.0" y="275.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="0.0" width="0.0" x="277.0" y="137.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge bpmnElement="flow1" id="BPMNEdge_flow1" sourceElement="startCommit" targetElement="judgementStage">
+        <omgdi:waypoint x="92.0" y="236.0"/>
+        <omgdi:waypoint x="154.0" y="238.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="-1.0" width="-1.0" x="-1.0" y="-1.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow2" id="BPMNEdge_flow2" sourceElement="startevent1" targetElement="judgeWork">
+        <omgdi:waypoint x="206.0" y="238.0"/>
+        <omgdi:waypoint x="254.0" y="239.5"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="-1.0" width="-1.0" x="-1.0" y="-1.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow3" id="BPMNEdge_flow3" sourceElement="judgeWork" targetElement="endevent1">
+        <omgdi:waypoint x="359.0" y="239.5"/>
+        <omgdi:waypoint x="404.0" y="238.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="-1.0" width="-1.0" x="-1.0" y="-1.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow4" id="BPMNEdge_flow4" sourceElement="judgeTimerOut" targetElement="Email1">
+        <omgdi:waypoint x="316.0" y="352.0"/>
+        <omgdi:waypoint x="316.0" y="400.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="-1.0" width="-1.0" x="-1.0" y="-1.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow5" id="BPMNEdge_flow5" sourceElement="Email1" targetElement="endevent3">
+        <omgdi:waypoint x="313.0" y="471.0"/>
+        <omgdi:waypoint x="313.0" y="530.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="-1.0" width="-1.0" x="-1.0" y="-1.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow6" id="BPMNEdge_flow6" sourceElement="judgementStage" targetElement="studentAuditing">
+        <omgdi:waypoint x="475.0" y="238.0"/>
+        <omgdi:waypoint x="550.0" y="238.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="-1.0" width="-1.0" x="-1.0" y="-1.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow7" id="BPMNEdge_flow7" sourceElement="startevent2" targetElement="Auditing">
+        <omgdi:waypoint x="592.0" y="239.0"/>
+        <omgdi:waypoint x="630.0" y="240.5"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="-1.0" width="-1.0" x="-1.0" y="-1.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow8" id="BPMNEdge_flow8" sourceElement="Auditing" targetElement="endevent4">
+        <omgdi:waypoint x="751.0" y="240.5"/>
+        <omgdi:waypoint x="790.0" y="239.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="-1.0" width="-1.0" x="-1.0" y="-1.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow9" id="BPMNEdge_flow9" sourceElement="studentAuditing" targetElement="teacherAuditing">
+        <omgdi:waypoint x="696.0" y="338.0"/>
+        <omgdi:waypoint x="696.0" y="420.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="-1.0" width="-1.0" x="-1.0" y="-1.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow10" id="BPMNEdge_flow10" sourceElement="teacherAuditing" targetElement="endevent5">
+        <omgdi:waypoint x="774.0" y="460.5"/>
+        <omgdi:waypoint x="860.0" y="459.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="-1.0" width="-1.0" x="-1.0" y="-1.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow11" id="BPMNEdge_flow11" sourceElement="boundarytimer1" targetElement="endevent6">
+        <omgdi:waypoint x="859.0" y="291.0"/>
+        <omgdi:waypoint x="940.0" y="288.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="-1.0" width="-1.0" x="-1.0" y="-1.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</definitions>

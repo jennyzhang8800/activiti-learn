@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.activiti.mapper.UserMapper">
+
+    <select id="findUserInfo" resultType="com.activiti.pojo.user.User">
+        SELECT *
+        FROM judge_stu_info
+        WHERE EMAIL_ADDRESS = #{emailAddr};
+    </select>
+
+    <insert id="insertUser" parameterType="com.activiti.pojo.user.User">
+        INSERT IGNORE INTO judge_stu_info
+        (USER_NAME, EMAIL_ADDRESS, ABILITY_LEVEL, COURSE_CODE)
+        VALUES
+            (#{userName}, #{emailAddress}, #{abilityLevel}, #{courseCode})
+    </insert>
+
+    <insert id="chaosUserInfo" parameterType="string">
+        INSERT INTO ${tableName} (
+            USER_NAME,
+            EMAIL_ADDRESS,
+            ABILITY_LEVEL
+        ) SELECT
+              USER_NAME,
+              EMAIL_ADDRESS,
+              ABILITY_LEVEL
+          FROM
+              judge_stu_info
+          WHERE COURSE_CODE = #{courseCode}
+          ORDER BY USER_NAME DESC;
+    </insert>
+
+    <delete id="deleteChaosUserInfo" parameterType="string">
+        DROP TABLE ${tableName};
+    </delete>
+
+    <insert id="insertUserWork" parameterType="com.activiti.pojo.user.StudentWorkInfo">
+        INSERT INTO judge_stu_work_info (COURSE_CODE, EMAIL_ADDRESS, WORK_DETAIL, LAST_COMMIT_TIME)
+        VALUES (
+            #{courseCode}, #{emailAddress}, #{workDetail}, #{lastCommitTime}
+        )
+    </insert>
+
+    <select id="selectStudentWorkInfo" parameterType="com.activiti.pojo.user.StudentWorkInfo"
+            resultType="com.activiti.pojo.user.StudentWorkInfo">
+        SELECT *
+        FROM judge_stu_work_info
+        WHERE COURSE_CODE = #{courseCode} AND EMAIL_ADDRESS = #{emailAddress}
+    </select>
+
+    <select id="selectStudentWorkInfoPage" resultType="com.activiti.pojo.user.StudentWorkInfo">
+        SELECT *
+        FROM judge_stu_work_info
+        WHERE EMAIL_ADDRESS = #{email}
+        LIMIT #{offset}, #{limit};
+    </select>
+
+    <select id="countStudentWorkInfo" parameterType="string" resultType="long">
+        SELECT count(*)
+        FROM judge_stu_work_info
+        WHERE EMAIL_ADDRESS = #{email};
+    </select>
+
+    <select id="selectAllWorkInfo" parameterType="string" resultType="com.activiti.pojo.user.StudentWorkInfo">
+        SELECT *
+        FROM judge_stu_work_info
+        WHERE EMAIL_ADDRESS = #{email} AND GRADE IS NOT NULL;
+    </select>
+
+    <select id="selectNoGradeUser" parameterType="java.lang.String" resultType="com.activiti.pojo.user.StudentWorkInfo">
+        SELECT *
+        FROM judge_stu_work_info
+        WHERE COURSE_CODE = #{courseCode} AND GRADE IS NULL
+    </select>
+
+    <select id="selectUnFinishJudgeUser" parameterType="java.lang.String"
+            resultType="com.activiti.pojo.user.StudentWorkInfo">
+        SELECT *
+        FROM judge_stu_work_info
+        WHERE COURSE_CODE = #{courseCode} AND JOIN_JUDGE_TIME IS NULL
+    </select>
+
+    <insert id="insertUserRole" parameterType="com.activiti.pojo.user.UserRole">
+        INSERT INTO judge_user_role (ID, EMAIL, REMARKS)
+        VALUES (
+            #{id}, #{email}, #{remarks}
+        )
+    </insert>
+
+    <select id="selectAllUserWork" parameterType="java.lang.String" resultType="com.activiti.pojo.user.StudentWorkInfo">
+        SELECT *
+        FROM judge_stu_work_info
+        WHERE COURSE_CODE = #{courseCode}
+    </select>
+
+    <select id="selectAllUserRole" resultType="com.activiti.pojo.user.UserRole">
+        SELECT *
+        FROM judge_user_role
+    </select>
+
+    <delete id="deleteUserRole" parameterType="string">
+        DELETE FROM judge_user_role
+        WHERE EMAIL = #{email}
+    </delete>
+
+    <select id="selectAllStuInCourse" parameterType="string" resultType="string">
+        SELECT EMAIL_ADDRESS
+        FROM judge_stu_work_info
+        WHERE COURSE_CODE = #{courseCode}
+    </select>
+
+</mapper>
