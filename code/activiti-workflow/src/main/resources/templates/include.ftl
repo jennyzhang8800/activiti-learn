@@ -16,3 +16,4 @@
 <script src="${base}/js/jquery-3.2.1.min.js"></script>
 <script src="${base}/layui/layui.js"></script>
 <script src="${base}/js/global.js"></script>
+<script src="${base}/js/echarts.common.min.js"></script>

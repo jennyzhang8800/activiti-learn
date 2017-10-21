@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.activiti.mapper.AnalysisMapper">
+
+    <select id="selectAllStudentWorkInfo" parameterType="string" resultType="com.activiti.pojo.tools.Analysis">
+        SELECT LAST_COMMIT_TIME,GRADE FROM judge_stu_work_info WHERE COURSE_CODE=#{courseCode}
+    </select>
+
+</mapper>

@@ -202,6 +202,20 @@ public class IndexController {
     }
 
     /**
+     * 报表统计
+     *
+     * @param request
+     * @return
+     */
+    @RequestMapping("/analysisView")
+    public String analysisView(HttpServletRequest request, ModelMap modelMap) throws Exception {
+        if (!commonUtil.isManageRole(CommonUtil.getEmailFromSession(request))) throw new Exception("非管理员不可查看");
+        List<ScheduleDto> scheduleDtoList = scheduleMapper.selectAllOfScheduleTime();
+        modelMap.put("scheduleDtoList", scheduleDtoList);
+        return "submodule/analysisView";
+    }
+
+    /**
      * 测试页面
      *
      * @param modelMap

@@ -57,6 +57,12 @@ layui.use('element', function () {
         layui_body.html(ajaxGet('./emailLogView'));
     });
 
+    $('#my-analysisView').on('click', function () {
+        if ($('.my-analysisView').length)return false;
+        layui_body.html('');
+        layui_body.html(ajaxGet('./analysisView'));
+    });
+
     var ajaxGet = function (url) {
         return $.ajax({url: url, async: false}).responseText;
     }
