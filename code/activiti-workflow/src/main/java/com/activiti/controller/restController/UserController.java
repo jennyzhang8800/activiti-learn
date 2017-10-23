@@ -1,7 +1,9 @@
 package com.activiti.controller.restController;
 
 import com.activiti.common.aop.ApiAnnotation;
+import com.activiti.common.async.AsyncTasks;
 import com.activiti.common.kafka.MailProducer;
+import com.activiti.common.utils.ActivitiHelper;
 import com.activiti.common.utils.CommonUtil;
 import com.activiti.common.utils.ConstantsUtils;
 import com.activiti.mapper.AdminMapper;
@@ -16,6 +18,7 @@ import com.activiti.service.JudgementService;
 import com.activiti.service.ScheduleService;
 import com.activiti.service.UserService;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,6 +56,10 @@ public class UserController {
     private AdminMapper adminMapper;
     @Autowired
     private VerifyTaskMapper verifyTaskMapper;
+    @Autowired
+    private AsyncTasks asyncTasks;
+    @Autowired
+    private ActivitiHelper activitiHelper;
 
     /*
      *  根据Email获取用户信息
@@ -79,12 +86,9 @@ public class UserController {
     public Object commitWork(@RequestParam(name = "courseCode") String courseCode,
                              @RequestParam(name = "workDetail") String workDetail, HttpServletRequest request) throws Exception {
         String email = CommonUtil.getEmailFromSession(request);
-        Date deadline = scheduleService.selectScheduleTime(courseCode).getJudgeStartTime();
         if (userService.selectAllUserRole().stream().anyMatch(userRole -> {
             return email.equals(userRole.getEmail());
         })) throw new Exception("身为管理员的你不能提交作业！！！");
-        if (commonUtil.compareDate(new Date(), deadline))
-            throw new Exception("提交作业截至时间:" + CommonUtil.dateToString(deadline));
         StudentWorkInfo studentWorkInfo = new StudentWorkInfo(courseCode, email, workDetail, new Date());
         User user = new User(commonUtil.getRandomUserName(), email, courseCode);
         try {
@@ -93,7 +97,16 @@ public class UserController {
             throw new Exception("你已经参与过答题了！！");
         }
         userService.insertUser(user);
-        studentWorkInfo.setLastCommitTime(new Date());
+        ScheduleDto scheduleDto = scheduleService.selectScheduleTime(courseCode);
+        List<String> emailList = userMapper.selectNonDistributeUser(courseCode);
+        //如果满了人数默认100人则异步启动流程
+        if (null != emailList && emailList.size() >= scheduleDto.getDistributeMaxUser()) {
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("emailList", emailList);
+            jsonObject.put("courseCode", courseCode);
+            jsonObject.put("email", email);
+            asyncTasks.asyncTask(jsonObject, "distributeTask");
+        }
         ModelMap modelMap = new ModelMap();
         modelMap.put("courseCode", courseCode);
         modelMap.put("workDetail", workDetail);
@@ -143,28 +156,20 @@ public class UserController {
     @ApiAnnotation
     public Object selectWorkListToJudge(@RequestParam(value = "courseCode") String courseCode, HttpServletRequest request) throws Exception {
         String email = CommonUtil.getEmailFromSession(request);
-        String tableName = commonUtil.generateTableName(courseCode);
-        StudentWorkInfo studentWorkInfo = new StudentWorkInfo();
-        studentWorkInfo.setCourseCode(courseCode);
+        StudentWorkInfo studentWorkInfo = userService.selectStudentWorkInfo(new StudentWorkInfo(courseCode, email));
+        if (null != studentWorkInfo.getJoinJudgeTime())
+            throw new Exception("您已经参加过互评");
+        if ("false".equals(studentWorkInfo.getDistributeStatus()))
+            throw new Exception("您还不能参加互评");
         ScheduleDto scheduleDto = scheduleService.selectScheduleTime(courseCode);
-        if (commonUtil.compareDate(new Date(), scheduleDto.getJudgeEndTime()) || commonUtil.compareDate(scheduleDto.getJudgeStartTime(), new Date()))
-            throw new Exception("该课程不在互评时间段内(" + scheduleDto.getJudgeStartTimeString() + "至" + scheduleDto.getJudgeEndTimeString() + ")");
-        String githubAddress = scheduleDto.getGithubAddress();
-        JSONObject response = commonService.getQAFromGitHub(githubAddress);
-        int studentId = judgementService.selectChaosId(email, tableName);
-        int countWork = judgementService.countAllWorks(tableName);
-        int judgeTimes = scheduleDto.getJudgeTimes();
-        List<Integer> initList = new ArrayList<>();
-        for (int i = 1; i <= judgeTimes; i++) {
-            int id = studentId + i;
-            int result = id > countWork ? id - countWork : id;
-            initList.add(result);
-        }
+        JSONObject response = commonService.getQAFromGitHub(scheduleDto.getGithubAddress());
         List<StudentWorkInfo> workInfoList = new ArrayList<>();
-        initList.forEach(index -> {
-            workInfoList.add(userService.selectStudentWorkInfo(new StudentWorkInfo(courseCode,
-                    judgementService.selectStudentWorkInfoChaosById(String.valueOf(index), tableName))));
+        JSONArray jsonArray = activitiHelper.selectWorkListToJudge(email, courseCode);
+        jsonArray.forEach(index -> {
+            workInfoList.add(userService.selectStudentWorkInfo(new StudentWorkInfo(courseCode, index.toString())));
         });
+        if ("true".equals(studentWorkInfo.getDistributeStatus()) && null == studentWorkInfo.getJoinJudgeTime() && workInfoList.size() == 0)
+            throw new Exception("您已经错过了互评机会");
         response.put("workList", workInfoList);
         return response;
     }
@@ -187,9 +192,6 @@ public class UserController {
         if (null != userService.selectStudentWorkInfo(new StudentWorkInfo(courseCode, email)).getJoinJudgeTime())
             throw new Exception("您已经参加过互评");
         ScheduleDto scheduleDto = scheduleService.selectScheduleTime(courseCode);
-        //校验互评时间段
-        if (commonUtil.compareDate(new Date(), scheduleDto.getJudgeEndTime())) throw new Exception("互评时间已经过去了" +
-                "，时间段为(" + scheduleDto.getJudgeStartTimeString() + "-" + scheduleDto.getJudgeEndTimeString() + ")");
         int judgeLimitTimes = scheduleDto.getJudgeTimes();
         JSONObject judgeList = JSON.parseObject(judge);
         List<JudgementLs> judgementLsList = new ArrayList<>();
@@ -205,6 +207,7 @@ public class UserController {
         });
         judgementService.insertJudgementLs(judgementLsList);   //插入互评流水
         judgementService.updateStuJudgeTime(new StudentWorkInfo(courseCode, email, new Date()));  //更新这名用户参与互评的时间
+        activitiHelper.completeTask(email, courseCode);
         return "提交评论结果成功";
     }
 

@@ -21,6 +21,7 @@ public class StudentWorkInfo implements Serializable {
     private int judgeTimes;      //作业被评论次数
     private Date joinJudgeTime;   //参与互评的时间
     private String joinJudgeTimeString;
+    private String distributeStatus;  //分配状态  false：未分配  true：已经分配了
 
     public String getLastCommitTimeString() {
         return lastCommitTimeString;
@@ -55,6 +56,14 @@ public class StudentWorkInfo implements Serializable {
         this.courseCode = courseCode;
         this.emailAddress = emailAddress;
         this.joinJudgeTime = joinJudgeTime;
+    }
+
+    public String getDistributeStatus() {
+        return distributeStatus;
+    }
+
+    public void setDistributeStatus(String distributeStatus) {
+        this.distributeStatus = distributeStatus;
     }
 
     public String getCourseCode() {
@@ -95,7 +104,7 @@ public class StudentWorkInfo implements Serializable {
 
     public void setLastCommitTime(Date lastCommitTime) {
         this.lastCommitTime = lastCommitTime;
-        this.lastCommitTimeString= CommonUtil.dateToString(lastCommitTime);
+        this.lastCommitTimeString = CommonUtil.dateToString(lastCommitTime);
     }
 
     public Double getGrade() {
@@ -128,7 +137,7 @@ public class StudentWorkInfo implements Serializable {
 
     public void setJoinJudgeTime(Date joinJudgeTime) {
         this.joinJudgeTime = joinJudgeTime;
-        this.joinJudgeTimeString=CommonUtil.dateToString(joinJudgeTime);
+        this.joinJudgeTimeString = CommonUtil.dateToString(joinJudgeTime);
     }
 
     @Override

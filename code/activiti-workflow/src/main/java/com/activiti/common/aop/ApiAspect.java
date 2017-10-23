@@ -82,7 +82,7 @@ public class ApiAspect {
         }
         invokeLog.set(log);
         if (apiAnnotation.insertLog()){
-            asyncTasks.insertInvokeLogTask(invokeLog.get());
+            asyncTasks.asyncTask(invokeLog.get(),"insertLog");
         }
         return restApiResponse;
     }

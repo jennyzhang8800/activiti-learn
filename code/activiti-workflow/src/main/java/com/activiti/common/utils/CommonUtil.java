@@ -52,8 +52,9 @@ import java.util.regex.Pattern;
 @Component("CommonUtil")
 public class CommonUtil {
     private static final Logger logger = LoggerFactory.getLogger(CommonUtil.class);
-    private static Sequence sequence = new Sequence(0, 0);
 
+    @Autowired
+    private Sequence sequence;
     @Autowired
     private MailService mailService;
     @Autowired
@@ -69,6 +70,16 @@ public class CommonUtil {
     @Autowired
     private Configuration configuration;
 
+
+    /**
+     * 根据题号求url
+     * @param qNo
+     * @return
+     */
+    public String generateGitHubUrl(int qNo) {
+        int result = (qNo - 1) / 100 + 1;
+        return "https://api.github.com/repos/chyyuu/os_course_exercise_library/contents/data/json/"+result+"/"+qNo+".json";
+    }
 
     /**
      * 请求gitlab获取题目与答案

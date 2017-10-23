@@ -1,6 +1,6 @@
 <div class="my-assessment">
     <fieldset class="layui-elem-field" style="margin-top: 30px;">
-        <legend>课程列表:</legend>
+        <legend>题目列表:</legend>
         <div style="margin: 20px 30px 20px;">
         <#if (scheduleDtoList?? && scheduleDtoList?size>0)>
             <#list scheduleDtoList as item>
@@ -13,7 +13,7 @@
         </div>
     </fieldset>
     <fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
-        <legend class="my-assessment-courseCode">课程ID:<span></span></legend>
+        <legend class="my-assessment-courseCode">题目ID:<span></span></legend>
         <br>
         <br>
         <div class="layui-form-item layui-form-text">
@@ -55,6 +55,7 @@
             $.ajax({
                 url: './api/user/selectWorkListToJudge',
                 data: {courseCode: courseCode},
+                type:"POST",
                 dataType: 'json',
                 success: function (data) {
                     if (!data.success) {
@@ -119,6 +120,7 @@
                     judge:JSON.stringify(judgeGradeList),
                     courseCode:courseCode
                 },
+                type:"POST",
                 dataType: 'json',
                 success: function (data) {
                     if (!data.success) {

@@ -1,6 +1,6 @@
 <div class="my-answer">
     <fieldset class="layui-elem-field" style="margin-top: 30px;">
-        <legend>课程列表:</legend>
+        <legend>题目列表:</legend>
         <div style="    margin: 20px 30px 20px;">
         <#if scheduleDtoList??>
             <#list scheduleDtoList as item>
@@ -12,11 +12,11 @@
     </fieldset>
 
     <fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
-        <legend class="my-answer-fieldset-courseCode" courseCode="">课程ID:</legend>
+        <legend class="my-answer-fieldset-courseCode" courseCode="">题目ID:</legend>
     </fieldset>
     <div class="layui-form">
         <div class="layui-form-item layui-form-text">
-            <label class="layui-form-label">题目</label>
+            <label class="layui-form-label">题目内容</label>
             <div class="layui-input-block">
                 <textarea class="layui-textarea my-answer-question" name="question" cols="" rows="10"
                           readonly></textarea>
@@ -48,10 +48,11 @@
             $.ajax({
                 url: './api/common/getQAContent',
                 data: {courseCode: courseCode},
+                type:"POST",
                 dataType: 'json',
                 success: function (data) {
                     $('.my-answer-question').val(data.data);
-                    fieldset.html('课程ID:' + courseCode);
+                    fieldset.html('题目ID:' + courseCode);
                     fieldset.attr('courseCode', courseCode);
                 }
             })
@@ -70,6 +71,7 @@
                     courseCode: courseCode,
                     workDetail: data.field.answer
                 },
+                type:"POST",
                 dataType: 'json',
                 success: function (result) {
                     if (result.success) {

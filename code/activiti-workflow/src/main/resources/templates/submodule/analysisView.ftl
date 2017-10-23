@@ -1,6 +1,6 @@
 <div class="my-analysisView">
     <fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
-        <legend>课程选择</legend>
+        <legend>题目选择</legend>
     </fieldset>
     <div style="margin: 20px 30px 20px;">
     <#if scheduleDtoList??>
@@ -128,6 +128,7 @@
                 url: url,
                 data: {courseCode: courseCode},
                 dataType: 'json',
+                type:"POST",
                 async: false,
                 success: function (data) {
                     if (!data.success) {

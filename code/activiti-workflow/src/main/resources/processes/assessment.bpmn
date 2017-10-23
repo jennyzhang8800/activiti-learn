@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:activiti="http://activiti.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" xmlns:tns="http://www.activiti.org/test" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" expressionLanguage="http://www.w3.org/1999/XPath" id="m1508694953807" name="" targetNamespace="http://www.activiti.org/test" typeLanguage="http://www.w3.org/2001/XMLSchema">
+  <process id="assessmentWorkFlow" isClosed="false" isExecutable="true" processType="None">
+    <startEvent id="start" name="begin distribute task"/>
+    <userTask activiti:assignee="#{assignee}" activiti:exclusive="true" id="assessment" name="begin assessed"/>
+    <endEvent id="end" name="end assessed"/>
+    <sequenceFlow id="_5" sourceRef="start" targetRef="assessment"/>
+    <sequenceFlow id="_6" sourceRef="assessment" targetRef="end"/>
+    <serviceTask activiti:exclusive="true" activiti:expression="${activitiHelper.emailAlert(execution)}" id="emailAlertService" name="emailAlertService"/>
+    <sequenceFlow id="_7" sourceRef="timeoutEvent" targetRef="emailAlertService"/>
+    <sequenceFlow id="_8" sourceRef="emailAlertService" targetRef="end"/>
+    <boundaryEvent attachedToRef="assessment" cancelActivity="true" id="timeoutEvent" name="timeoutEvent">
+      <timerEventDefinition id="timeoutEvent_ED_1">
+        <timeDuration><![CDATA[${timeout}]]></timeDuration>
+      </timerEventDefinition>
+    </boundaryEvent>
+    <sequenceFlow id="_3" sourceRef="timeoutEvent" targetRef="emailAlertService">
+      <extensionElements>
+        <activiti:executionListener delegateExpression="${flowTakeListener}" event="take"/>
+      </extensionElements>
+    </sequenceFlow>
+  </process>
+  <bpmndi:BPMNDiagram documentation="background=#FFFFFF;count=1;horizontalcount=1;orientation=0;width=842.4;height=1195.2;imageableWidth=832.4;imageableHeight=1185.2;imageableX=5.0;imageableY=5.0" id="Diagram-_1" name="New Diagram">
+    <bpmndi:BPMNPlane bpmnElement="assessmentWorkFlow">
+      <bpmndi:BPMNShape bpmnElement="start" id="Shape-start">
+        <omgdc:Bounds height="32.0" width="32.0" x="95.0" y="185.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="32.0" width="32.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="assessment" id="Shape-assessment">
+        <omgdc:Bounds height="87.0" width="95.0" x="215.0" y="165.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="87.0" width="95.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="end" id="Shape-end">
+        <omgdc:Bounds height="32.0" width="32.0" x="470.0" y="180.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="32.0" width="32.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="emailAlertService" id="Shape-emailAlertService">
+        <omgdc:Bounds height="55.0" width="85.0" x="250.0" y="330.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="55.0" width="85.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="timeoutEvent" id="Shape-timeoutEvent">
+        <omgdc:Bounds height="32.0" width="32.0" x="275.0" y="220.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="0.0" width="0.0" x="60.0" y="55.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge bpmnElement="_3" id="BPMNEdge__3" sourceElement="timeoutEvent" targetElement="emailAlertService">
+        <omgdi:waypoint x="291.0" y="252.0"/>
+        <omgdi:waypoint x="291.0" y="330.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="0.0" width="0.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="_5" id="BPMNEdge__5" sourceElement="start" targetElement="assessment">
+        <omgdi:waypoint x="127.0" y="201.0"/>
+        <omgdi:waypoint x="215.0" y="208.5"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="0.0" width="0.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="_6" id="BPMNEdge__6" sourceElement="assessment" targetElement="end">
+        <omgdi:waypoint x="310.0" y="208.5"/>
+        <omgdi:waypoint x="470.0" y="196.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="0.0" width="0.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="_8" id="BPMNEdge__8" sourceElement="emailAlertService" targetElement="end">
+        <omgdi:waypoint x="335.0" y="357.5"/>
+        <omgdi:waypoint x="470.0" y="196.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="0.0" width="0.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</definitions>

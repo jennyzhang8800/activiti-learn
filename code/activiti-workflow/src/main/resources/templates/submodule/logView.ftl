@@ -16,6 +16,7 @@
         $.ajax({
             url: './api/common/countInvokeLog',
             dataType: 'json',
+            type:"POST",
             success: function (data) {
                 laypage.render({
                     elem: 'invokeLogLayPage',
@@ -29,6 +30,7 @@
                         $.ajax({
                             url: './api/common/selectInvokeLog',
                             data: param,
+                            type:"POST",
                             dataType: 'json',
                             success: function (data) {
                                 table.render({

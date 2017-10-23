@@ -1,21 +1,19 @@
 package com.activiti.common.interceptor;
 
-import com.activiti.common.utils.CommonUtil;
-import com.activiti.common.utils.ConstantsUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-public class LoginInterceptor implements HandlerInterceptor {
-    private final Logger logger = LoggerFactory.getLogger(HandlerInterceptor.class);
+public class CommonInterceptor implements HandlerInterceptor {
     private static String env;
 
-    public LoginInterceptor(String env) {
+    public CommonInterceptor(String env) {
         this.env = env;
+    }
+
+    public CommonInterceptor() {
     }
 
     /**
@@ -29,16 +27,6 @@ public class LoginInterceptor implements HandlerInterceptor {
      */
     @Override
     public boolean preHandle(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Object o) throws Exception {
-        String email = CommonUtil.getEmailFromSession(httpServletRequest);
-        logger.info("{user=" + email + "}>>>START HTTP REQUEST:" + httpServletRequest.getRequestURL());
-        if ("".equals(email) || null == email) {
-            httpServletResponse.sendRedirect("login?redirectUrl=" + httpServletRequest.getServletPath());
-            return false;
-        }
-        String uuid =(String) httpServletRequest.getSession().getAttribute(ConstantsUtils.loginAbutmentRedisStore + email);
-        if ("prod".equals(env) && (null == uuid || "".equals(uuid))) {
-           throw new Exception("非法请求！！！！");
-        }
         return true;
     }
 
@@ -53,9 +41,8 @@ public class LoginInterceptor implements HandlerInterceptor {
      */
     @Override
     public void postHandle(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Object o, ModelAndView modelAndView) throws Exception {
-        String email = (String) httpServletRequest.getSession().getAttribute(ConstantsUtils.sessionEmail);
-        if (null != modelAndView && !"".equals(email) && null != email)
-            modelAndView.getModel().put("userEmail", httpServletRequest.getSession().getAttribute(ConstantsUtils.sessionEmail));
+        if (null!=modelAndView)
+            modelAndView.getModel().put("projectEnv", env);
     }
 
     /**
@@ -69,7 +56,5 @@ public class LoginInterceptor implements HandlerInterceptor {
      */
     @Override
     public void afterCompletion(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Object o, Exception e) throws Exception {
-        String email = (String) httpServletRequest.getSession().getAttribute("userEmail");
-        logger.info("{user=" + email + "}>>>END HTTP REQUEST:" + httpServletRequest.getRequestURL());
     }
 }

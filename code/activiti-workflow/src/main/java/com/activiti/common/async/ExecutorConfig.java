@@ -47,7 +47,7 @@ public class ExecutorConfig {
 //    }
 
     @Bean
-    public Executor insertInvokeLogTask() {
+    public Executor asyncTask() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setCorePoolSize(corePoolSize);
         executor.setMaxPoolSize(maxPoolSize);

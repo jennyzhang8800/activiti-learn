@@ -85,6 +85,7 @@
                         $.ajax({
                             url: './api/user/deleteUserRole',
                             data: {email: email},
+                            type:"POST",
                             dataType: 'json',
                             success: function (data) {
                                 if (!data.data) {
@@ -127,6 +128,7 @@
                     var email = form.find("input[name='email']").val();
                     $.ajax({
                         url: './api/user/addUserRole',
+                        type:"POST",
                         data: {
                             id: form.find("input[name='id']").val(),
                             email: email,

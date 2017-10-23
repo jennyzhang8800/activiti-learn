@@ -1,20 +1,25 @@
 package com.activiti.controller;
 
+import com.activiti.common.redis.RedisCommonUtil;
 import com.activiti.common.utils.CommonUtil;
 import com.activiti.common.utils.ConstantsUtils;
 import com.activiti.mapper.ScheduleMapper;
 import com.activiti.pojo.schedule.ScheduleDto;
 import com.activiti.pojo.user.StudentWorkInfo;
+import com.activiti.pojo.user.UserRole;
 import com.activiti.service.ScheduleService;
 import com.activiti.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,9 +35,9 @@ public class IndexController {
     @Autowired
     private UserService userService;
     @Autowired
-    private ScheduleService scheduleService;
-    @Autowired
     private ScheduleMapper scheduleMapper;
+    @Autowired
+    private RedisCommonUtil redisCommonUtil;
 
     /**
      * 登录页面
@@ -228,5 +233,25 @@ public class IndexController {
         modelMap.put("workDetail", "hfsjdfgsdufsujcnjds");
         modelMap.put("email", "email");
         return "mail/test";
+    }
+
+    /**
+     * 登陆对接
+     *
+     * @param email
+     * @param redirectUrl
+     * @param uuid
+     * @param request
+     * @return
+     */
+    @RequestMapping("/loginAbutment")
+    public String loginAbutment(@RequestParam("email") String email,
+                                @RequestParam("redirectUrl") String redirectUrl,
+                                @RequestParam("uuid") String uuid,
+                                HttpServletRequest request) {
+        if (uuid.equals(redisCommonUtil.get(ConstantsUtils.loginAbutmentRedisStore + email).toString()))
+            request.getSession().setAttribute(ConstantsUtils.loginAbutmentRedisStore + email, uuid);
+        request.getSession().setAttribute(ConstantsUtils.sessionEmail, email);
+        return "redirect:" + redirectUrl;
     }
 }

@@ -30,6 +30,7 @@
             $.ajax({
                 url: './api/user/selectMyJudgementWait',
                 data: {status: status},
+                type:"POST",
                 jsonType: 'json',
                 success: function (data) {
                     if (!data.success) {
@@ -58,7 +59,7 @@
                                         width: 2000,
                                         cols: [[ //标题栏
                                             {field: 'email', title: '邮箱', width: 150},
-                                            {field: 'courseCode', title: '课程代码', width: 150},
+                                            {field: 'courseCode', title: '题号', width: 150},
                                             {field: 'answer', title: '提交作业内容', width: 700},
                                             {field: 'judgeTimes', title: '被打分次数', width: 100},
                                             {field: 'grade', title: '成绩', width: 100, edit: 'text'},
@@ -89,6 +90,7 @@
             $.ajax({
                 url: './api/user/selectMyJudgementWait',
                 data: {status: status},
+                type:"POST",
                 jsonType: 'json',
                 success: function (data) {
                     if (!data.success) {
@@ -141,6 +143,7 @@
                 $.ajax({
                     url: './api/user/insertAdminJudgementResult',
                     data: data,
+                    type:"POST",
                     dateType: 'json',
                     success: function (result) {
                         if (!result.success) {

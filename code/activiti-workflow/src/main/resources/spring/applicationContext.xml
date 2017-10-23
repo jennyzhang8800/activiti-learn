@@ -7,6 +7,11 @@
     <import resource="spring-activiti.xml"/>
     <import resource="application-*.xml"/>
 
+    <bean id="Sequence" class="com.activiti.common.sequence.Sequence">
+        <constructor-arg name="datacenterId" value="0"/>
+        <constructor-arg name="workerId" value="0" />
+    </bean>
+
     <!--Quartz配置-->
     <bean id="SchedulerFactory" class="org.quartz.impl.StdSchedulerFactory"></bean>
     <bean id="QuartzManager" class="com.activiti.common.quartz.QuartzManager">
@@ -15,7 +20,7 @@
 
     <!--数据库事务管理-->
     <bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
-        <property name="dataSource" ref="dataSource" />
+        <property name="dataSource" ref="dataSource"/>
     </bean>
-    <tx:annotation-driven transaction-manager="txManager" />
+    <tx:annotation-driven transaction-manager="txManager"/>
 </beans>

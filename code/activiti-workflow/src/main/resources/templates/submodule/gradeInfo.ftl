@@ -24,6 +24,7 @@
             $.ajax({
                 url: './api/user/selectStudentGrade',
                 dataType: 'json',
+                type:"POST",
                 success: function (data) {
                     if (!data.success) {
                         layer.open({
@@ -37,7 +38,7 @@
                             height: 500,
                             width: 3000,
                             cols: [[ //标题栏
-                                {field: 'courseCode', title: '课程代码', width: 100},
+                                {field: 'courseCode', title: '题号', width: 100},
                                 {field: 'emailAddress', title: '邮箱', width: 200},
                                 {field: 'workDetail', title: '我的答案', width: 750},
                                 {field: 'lastCommitTimeString', title: '提交时间', width: 160},
@@ -67,6 +68,7 @@
                     url: './api/user/selectWhoJudgeMe',
                     data: {courseCode: courseCode},
                     dataType: 'json',
+                    type:"POST",
                     success: function (data) {
                         if (!data.success) {
                             layer.open({
@@ -80,7 +82,7 @@
                                 height: 200,
                                 width: 700,
                                 cols: [[ //标题栏
-                                    {field: 'courseCode', title: '课程代码', width: 150},
+                                    {field: 'courseCode', title: '题号', width: 150},
                                     {field: 'judgeEmail', title: '邮箱', width: 250},
                                     {field: 'judgeTimeString', title: '提交时间', width: 200},
                                     {field: 'grade', title: '评分', width: 95}

@@ -16,6 +16,7 @@
         $.ajax({
             url: './api/common/countEmailLog',
             dataType: 'json',
+            type:"POST",
             success: function (data) {
                 laypage.render({
                     elem: 'emailInfoLayPage',
@@ -29,6 +30,7 @@
                         $.ajax({
                             url: './api/common/selectEmailLog',
                             data: param,
+                            type:"POST",
                             dataType: 'json',
                             success: function (data) {
                                 table.render({

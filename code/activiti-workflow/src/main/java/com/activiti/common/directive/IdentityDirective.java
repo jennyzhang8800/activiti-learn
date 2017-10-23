@@ -13,8 +13,6 @@ import java.util.Map;
 @Component("identityDirective")
 public class IdentityDirective implements TemplateDirectiveModel {
     @Autowired
-    private UserService userService;
-    @Autowired
     private CommonUtil commonUtil;
 
     @Override

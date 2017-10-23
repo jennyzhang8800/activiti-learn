@@ -59,6 +59,7 @@ public interface UserMapper {
 
     /**
      * 查询所有课程成绩
+     *
      * @param email
      * @return
      */
@@ -134,8 +135,26 @@ public interface UserMapper {
 
     /**
      * 查询参加了课程的所有学生
+     *
      * @param courseCode
      * @return
      */
     List<String> selectAllStuInCourse(String courseCode);
+
+    /**
+     * 查询所有未分配作业的人
+     *
+     * @param courseCode
+     * @return
+     */
+    List<String> selectNonDistributeUser(String courseCode);
+
+    /**
+     * 更新分配状态
+     *
+     * @param courseCode
+     * @param email
+     * @return
+     */
+    int updateDistributeStatus(@Param("courseCode") String courseCode, @Param("email") String email);
 }

@@ -81,7 +81,7 @@
     </select>
 
     <insert id="insertUserRole" parameterType="com.activiti.pojo.user.UserRole">
-        INSERT INTO judge_user_role (ID, EMAIL, REMARKS)
+        INSERT IGNORE INTO judge_user_role (ID, EMAIL, REMARKS)
         VALUES (
             #{id}, #{email}, #{remarks}
         )
@@ -108,5 +108,17 @@
         FROM judge_stu_work_info
         WHERE COURSE_CODE = #{courseCode}
     </select>
+
+    <select id="selectNonDistributeUser" parameterType="string" resultType="string">
+        SELECT EMAIL_ADDRESS
+        FROM judge_stu_work_info
+        WHERE COURSE_CODE = #{courseCode} AND DISTRIBUTE_STATUS = 'false'
+    </select>
+
+    <update id="updateDistributeStatus" parameterType="string">
+        UPDATE judge_stu_work_info
+        SET DISTRIBUTE_STATUS = 'true'
+        WHERE COURSE_CODE = #{courseCode} AND EMAIL_ADDRESS = #{email}
+    </update>
 
 </mapper>

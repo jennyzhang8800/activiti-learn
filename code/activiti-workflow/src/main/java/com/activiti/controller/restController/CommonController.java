@@ -1,10 +1,13 @@
 package com.activiti.controller.restController;
 
 import com.activiti.common.aop.ApiAnnotation;
+import com.activiti.common.redis.RedisCommonUtil;
 import com.activiti.common.utils.CommonUtil;
+import com.activiti.common.utils.ConstantsUtils;
 import com.activiti.mapper.ScheduleMapper;
 import com.activiti.mapper.ToolsMapper;
 import com.activiti.pojo.schedule.ScheduleDto;
+import com.activiti.pojo.user.UserRole;
 import com.activiti.service.CommonService;
 import com.activiti.service.ScheduleService;
 import com.activiti.service.UserService;
@@ -18,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.UUID;
 
 
 /**
@@ -36,6 +40,10 @@ public class CommonController {
     private ScheduleMapper scheduleMapper;
     @Autowired
     private CommonUtil commonUtil;
+    @Autowired
+    private RedisCommonUtil redisCommonUtil;
+    @Autowired
+    private UserService userService;
 
     /**
      * GitHub请求题目和答案
@@ -78,13 +86,11 @@ public class CommonController {
     public Object insertScheduleTime(@RequestParam(value = "data") String param) throws Exception {
         JSONObject jsonObject = JSON.parseObject(param);
         ScheduleDto scheduleDto = jsonObject.toJavaObject(ScheduleDto.class);
+        scheduleDto.setGithubAddress(commonUtil.generateGitHubUrl(Integer.valueOf(scheduleDto.getCourseCode())));
         String courseCode = scheduleDto.getCourseCode();
         if (null != scheduleService.selectScheduleTime(courseCode)) throw new Exception(courseCode + "该课程已经存在");
         if (null == courseCode) throw new Exception("courseCode字段不能为空");
-        if (!commonUtil.validateTime(scheduleDto)) throw new Exception("时间段配置错误");
-        scheduleMapper.createTable(commonUtil.generateTableName(courseCode));
         scheduleService.insertScheduleTime(scheduleDto);
-        commonUtil.addNewActivitiJob(scheduleDto);
         return "课程部署成功";
     }
 
@@ -104,8 +110,6 @@ public class CommonController {
             identity = true;
         }
         if (identity) {
-            scheduleMapper.dropTable(commonUtil.generateTableName(courseCode));
-            commonUtil.removeNewActivitiJob(scheduleService.selectScheduleTime(courseCode));
             scheduleMapper.deleteCourse(courseCode);
             return "课程移除成功";
         } else {
@@ -237,5 +241,26 @@ public class CommonController {
     @ApiAnnotation
     public Object getStudentGradeAnalysis(@RequestParam("courseCode") String courseCode) {
         return commonService.getStudentGradeAnalysis(courseCode);
+    }
+
+    /**
+     * 对接
+     * @param email
+     * @return
+     */
+    @ResponseBody
+    @RequestMapping("/loginAbutment")
+    @ApiAnnotation
+    public Object loginAbutment(@RequestParam("email") String email,
+                                @RequestParam("userType") String userType,
+                                @RequestParam("password") String password) throws Exception {
+        if (!ConstantsUtils.password.equals(password)) throw new Exception("非法登录对接！！！！");
+        String uuid = String.valueOf(commonUtil.getSequenceId());
+        redisCommonUtil.put(ConstantsUtils.loginAbutmentRedisStore + email, uuid, 60);
+        if ("staff".equals(userType))
+            userService.insertUserRole(new UserRole(1, email, "staff"));
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("uuid", uuid);
+        return jsonObject;
     }
 }

@@ -8,9 +8,9 @@
     </select>
 
     <insert id="insertScheduleTime" parameterType="com.activiti.pojo.schedule.ScheduleDto">
-        INSERT INTO judge_schedule_time (course_name, course_code, judge_start_time, judge_end_time, audit_start_time, audit_end_time, publish_time, github_address)
+        INSERT INTO judge_schedule_time (course_name, course_code, judge_start_time, judge_end_time, audit_start_time, audit_end_time, publish_time, github_address,distribute_max_user,TIMEOUT)
             VALUE (#{courseName}, #{courseCode}, #{judgeStartTime}, #{judgeEndTime},
-                   #{auditStartTime}, #{auditEndTime}, #{publishTime}, #{githubAddress})
+                   #{auditStartTime}, #{auditEndTime}, #{publishTime}, #{githubAddress},#{distributeMaxUser},#{timeout})
     </insert>
 
     <update id="updateScheduleTime" parameterType="com.activiti.pojo.schedule.ScheduleDto">
@@ -64,13 +64,15 @@
 
     <update id="createTable" parameterType="string">
         CREATE TABLE IF NOT EXISTS ${tableName} (
-            `USER_ID` INT(11) NOT NULL AUTO_INCREMENT,
-            `USER_NAME` VARCHAR(20) DEFAULT NULL,
+            `USER_ID`       INT(11)            NOT NULL AUTO_INCREMENT,
+            `USER_NAME`     VARCHAR(20)                 DEFAULT NULL,
             `EMAIL_ADDRESS` VARCHAR(30) UNIQUE NOT NULL,
-            `ABILITY_LEVEL` VARCHAR(10) DEFAULT NULL,
+            `ABILITY_LEVEL` VARCHAR(10)                 DEFAULT NULL,
             INDEX index_email_address (`EMAIL_ADDRESS`),
             PRIMARY KEY (`USER_ID`)
-        )ENGINE = MyISAM DEFAULT CHARSET = utf8
+        )
+            ENGINE = MyISAM
+            DEFAULT CHARSET = utf8
     </update>
 
     <update id="dropTable" parameterType="string">
