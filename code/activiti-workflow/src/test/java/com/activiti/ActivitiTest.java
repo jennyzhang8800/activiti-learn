@@ -40,7 +40,7 @@ public class ActivitiTest {
         String businessKey="assessment";
         ProcessInstance processInstance = runtimeService.startProcessInstanceByKey("assessmentWorkFlow",businessKey, variables);
         logger.info(">>>>>>>>>>>>>>>>>>>>启动流程：" + processInstance.getId());
-        Thread.sleep(20000);
+        Thread.sleep(15000);
     }
 
     /**

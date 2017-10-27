@@ -70,10 +70,10 @@
     <br>
     <fieldset class="layui-elem-field" style="margin-top: 30px;">
         <legend>已配置的课程</legend>
-        <div>
-            <table class="my-time-conf-table" lay-filter="my-time-conf-table">
+        <div style="height:auto">
+            <table class="my-time-conf-table" lay-data="{height:100}" lay-filter="my-time-conf-table">
             </table>
-            <div style="margin-left: 15%;" id="my-time-conf-LayPage"></div>
+            <div id="my-time-conf-LayPage"></div>
         </div>
     </fieldset>
 
@@ -117,12 +117,12 @@
                                     table.render({
                                         elem: '.my-time-conf-table',
                                         data: data.data,
-                                        height: 272,
-                                        width: 3000,
+                                        height: 315,
+//                                        width: 900,
                                         cols: [[ //标题栏
                                             {field: 'courseName', title: '题目', width: 150},
                                             {field: 'courseCode', title: '题号', width: 150},
-                                            {field: 'githubAddress', title: 'GitHub地址', width: 700},
+                                            {field: 'githubAddress', title: 'GitHub地址', width: 500},
 //                                            {field: 'judgeStartTimeString', title: '互评开始时间', width: 200},
 //                                            {field: 'judgeEndTimeString', title: '互评结束时间', width: 200},
 //                                            {field: 'publishTimeString', title: '成绩发布时间', width: 200},

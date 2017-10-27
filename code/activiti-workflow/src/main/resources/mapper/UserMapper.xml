@@ -64,7 +64,7 @@
     <select id="selectAllWorkInfo" parameterType="string" resultType="com.activiti.pojo.user.StudentWorkInfo">
         SELECT *
         FROM judge_stu_work_info
-        WHERE EMAIL_ADDRESS = #{email} AND GRADE IS NOT NULL;
+        WHERE EMAIL_ADDRESS = #{email};
     </select>
 
     <select id="selectNoGradeUser" parameterType="java.lang.String" resultType="com.activiti.pojo.user.StudentWorkInfo">

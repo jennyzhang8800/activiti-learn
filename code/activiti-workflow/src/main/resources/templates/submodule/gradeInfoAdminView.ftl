@@ -19,7 +19,7 @@
         <table class="gradeInfoAdminViewTable" lay-filter="gradeInfoAdminViewTable">
         </table>
         <div>
-            <div style="margin-left: 15%;" id="gradeInfoAdminViewPage"></div>
+            <div id="gradeInfoAdminViewPage"></div>
         </div>
     </div>
 </div>

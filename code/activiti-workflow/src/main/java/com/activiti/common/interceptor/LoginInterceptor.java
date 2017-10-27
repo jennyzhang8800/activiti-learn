@@ -36,7 +36,7 @@ public class LoginInterceptor implements HandlerInterceptor {
             return false;
         }
         String uuid =(String) httpServletRequest.getSession().getAttribute(ConstantsUtils.loginAbutmentRedisStore + email);
-        if ("prod".equals(env) && (null == uuid || "".equals(uuid))) {
+        if ("pro".equals(env) && (null == uuid || "".equals(uuid))) {
            throw new Exception("非法请求！！！！");
         }
         return true;

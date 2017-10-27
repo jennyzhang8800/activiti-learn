@@ -1,6 +1,5 @@
 <div class="layui-header">
-    <div class="layui-logo">学生互评系统</div>
-    <ul class="layui-nav layui-layout-left">
+    <ul class="layui-nav">
         <li class="layui-nav-item">
             <a href="javascript:;">我的任务</a>
             <dl class="layui-nav-child">
@@ -33,10 +32,12 @@
         </#if>
     </@identity_validate>
     </ul>
+<#if projectEnv?? && projectEnv=="dev">
     <ul class="layui-nav layui-layout-right">
         <li class="layui-nav-item">
             <a href="javascript:;"><img src="${base}/img/beier.png" class="layui-nav-img">${userEmail!"我"}</a>
         </li>
         <li class="layui-nav-item"><a href="./logout">退出</a></li>
     </ul>
+</#if>
 </div>

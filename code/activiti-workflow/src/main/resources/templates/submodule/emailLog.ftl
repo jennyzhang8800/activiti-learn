@@ -4,7 +4,7 @@
         <div>
             <table class="emailInfoTable">
             </table>
-            <div style="margin-left: 15%;" id="emailInfoLayPage"></div>
+            <div id="emailInfoLayPage"></div>
         </div>
     </fieldset>
 </div>

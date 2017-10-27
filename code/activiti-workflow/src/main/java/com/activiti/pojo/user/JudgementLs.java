@@ -27,12 +27,13 @@ public class JudgementLs implements Serializable {
         this.nonJudgerEmail = nonJudgeEmail;
     }
 
-    public JudgementLs(String courseCode, String judgeEmail, String nonJudgeEmail, Double grade) {
+    public JudgementLs(String courseCode, String judgeEmail, String nonJudgeEmail, Double grade,String judgement) {
         this.courseCode = courseCode;
         this.judgerEmail = judgeEmail;
         this.nonJudgerEmail = nonJudgeEmail;
         this.grade = grade;
         this.judgeTime=new Date();
+        this.judgement=judgement;
     }
 
     public String getJudgeTimeString() {

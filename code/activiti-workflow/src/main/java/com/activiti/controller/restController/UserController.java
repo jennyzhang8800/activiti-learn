@@ -198,7 +198,7 @@ public class UserController {
         judgeList.keySet().forEach(key -> {
             JSONObject jsonObject = (JSONObject) judgeList.get(key);
             judgementLsList.add(new JudgementLs(courseCode,
-                    email, key, Double.valueOf(jsonObject.get("grade").toString())));
+                    email, key, Double.valueOf(jsonObject.get("grade").toString()),(String)jsonObject.get("judgement")));
             List<JudgementLs> judgementLsList1 = judgementService.selectJudgementLs(new JudgementLs(courseCode, key));  //查询和这个人相关的互评流水
             if (judgementLsList1 != null && judgementLsList1.size() + 1 == judgeLimitTimes) {  //这个人被别人评价次数够了，计算他的最终分数
                 double finalGrade = commonUtil.getMiddleNum(Double.valueOf(jsonObject.get("grade").toString()), judgementLsList1);

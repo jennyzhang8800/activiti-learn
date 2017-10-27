@@ -3,7 +3,7 @@
 <mapper namespace="com.activiti.mapper.VerifyTaskMapper">
 
     <insert id="insertTask" parameterType="com.activiti.pojo.user.VerifyTask">
-        INSERT INTO judge_verify_task (EMAIL, ANSWER, COURSE_CODE, JUDGE_TIMES)
+        INSERT IGNORE INTO judge_verify_task (EMAIL, ANSWER, COURSE_CODE, JUDGE_TIMES)
         VALUES (
             #{email},
             #{answer},

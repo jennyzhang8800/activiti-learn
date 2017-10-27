@@ -4,7 +4,7 @@
         <div>
             <table class="logInfoTable">
             </table>
-            <div style="margin-left: 15%;" id="invokeLogLayPage"></div>
+            <div id="invokeLogLayPage"></div>
         </div>
     </fieldset>
 </div>

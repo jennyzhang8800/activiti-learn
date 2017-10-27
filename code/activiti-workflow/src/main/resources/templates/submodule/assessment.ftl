@@ -30,18 +30,43 @@
                           readonly></textarea>
             </div>
         </div>
+        <div class="my-assessment-origin" style="display: none">
+            <div class="layui-form-item layui-form-text">
+                <label class="layui-form-label">学生答案</label>
+                <div class="layui-input-block">
+                    <textarea class="layui-textarea my-assessment-answer" name="" cols="" rows=""
+                              readonly></textarea>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">输入框</label>
+                <div class="layui-input-block">
+                    <input type="text" required lay-verify="required" placeholder="分数" autocomplete="off"
+                           class="layui-input my-assessment-grade">
+                </div>
+            </div>
+            <div class="layui-form-item layui-form-text">
+                <label class="layui-form-label">评语</label>
+                <div class="layui-input-block">
+                    <textarea placeholder="请输入评语" class="layui-textarea my-assessment-judgement"></textarea>
+                </div>
+            </div>
+        </div>
         <div>
             <table class="my-assessment-table" lay-filter="my-assessment-table">
             </table>
         </div
         <div class="layui-form-item">
-            <div class="layui-input-block my-assessment-commit" style="display: none">
+            <div class="layui-input-block my-assessment-commit">
                 <button class="layui-btn" lay-submit="">立即提交</button>
             </div>
         </div>
     </fieldset>
 </div>
-
+<script type="text/html" id="my-assessment-operation">
+    <a class="layui-btn layui-btn-danger layui-btn-mini" lay-event="answer">参与评分</a>
+    <a class="layui-btn layui-btn-danger layui-btn-mini" lay-event="save">保存</a>
+</script>
 <script>
     layui.use(['table', 'layer'], function () {
         var table = layui.table, layer = layui.layer, $ = layui.jquery;
@@ -55,7 +80,7 @@
             $.ajax({
                 url: './api/user/selectWorkListToJudge',
                 data: {courseCode: courseCode},
-                type:"POST",
+                type: "POST",
                 dataType: 'json',
                 success: function (data) {
                     if (!data.success) {
@@ -65,19 +90,27 @@
                         });
                     } else {
                         var response = data.data;
+                        var workList = response.workList;
+                        for (var i in workList) {
+                            judgeGradeList[workList[i]['emailAddress']] = {};
+                        }
                         judgeCount = response.workList.length;
                         parent.find('.my-assessment-standardAnswer').text(response.answer);
                         parent.find('.my-assessment-question').text(response.question);
                         table.render({
                             elem: '.my-assessment-table',
-                            data: response.workList,
+                            data: workList,
                             height: 250,
                             width: 3000,
                             cols: [[ //标题栏
-                                {field: 'courseCode', title: '课程代码', width: 100},
+                                {field: 'courseCode', title: '题目ID', width: 100},
                                 {field: 'emailAddress', title: '邮箱', width: 220},
-                                {field: 'workDetail', title: '回答', width: 600},
-                                {field: 'grade', title: '请打分', width: 100, edit: 'text'}
+                                {
+                                    field: 'operation',
+                                    title: '操作',
+                                    width: 150,
+                                    templet: '#my-assessment-operation'
+                                }
                             ]],
                             skin: 'row', //表格风格
                             even: true,
@@ -89,25 +122,9 @@
             });
         });
 
-        //单元格编辑事件
-        table.on('edit(my-assessment-table)', function (obj) {
-            if (!chekNum(obj.value)) {
-                if (obj.value !== '')
-                    layer.open({
-                        title: '请重新输入',
-                        content: '<p>输入的分数无效：' + obj.value + '</p>'
-                    });
-                delete judgeGradeList[obj.data.emailAddress];
-            } else {
-                judgeGradeList[obj.data.emailAddress] = {
-                    grade: obj.data.grade
-                }
-            }
-        });
-
         //提交事件
         parent.find('.my-assessment-commit button').on('click', function () {
-            if (JSONLength(judgeGradeList) !== judgeCount) {
+            if (JSONLength(judgeGradeList) !== judgeCount || !isJsonValidate(judgeGradeList)) {
                 layer.open({
                     title: '提交失败',
                     content: '请完成所有互评任务！'
@@ -117,10 +134,10 @@
             $.ajax({
                 url: './api/user/commitJudgementInfo',
                 data: {
-                    judge:JSON.stringify(judgeGradeList),
-                    courseCode:courseCode
+                    judge: JSON.stringify(judgeGradeList),
+                    courseCode: courseCode
                 },
-                type:"POST",
+                type: "POST",
                 dataType: 'json',
                 success: function (data) {
                     if (!data.success) {
@@ -138,6 +155,37 @@
             })
         });
 
+        //评分
+        table.on('tool(my-assessment-table)', function (obj) {
+            var answer = parent.find('.my-assessment-origin .my-assessment-answer');
+            var judgement = parent.find('.my-assessment-origin .my-assessment-judgement');
+            var grade = parent.find('.my-assessment-origin .my-assessment-grade');
+            var emailAddress = obj.data.emailAddress;
+            var detail = judgeGradeList[emailAddress];
+            console.log(detail);
+            if (obj.event === 'answer') {
+                parent.find('.my-assessment-origin').show();
+                answer.val(obj.data.workDetail);
+                judgement.val(detail.judgement);
+                grade.val(detail.grade);
+            } else {
+                if (judgement.val() === '') {
+                    layer.msg('请输入评语', {
+                        time: 2000 //2s后自动关闭
+                    });
+                } else if (grade.val() === '' || !chekNum(grade.val())) {
+                    layer.msg('请输入分数', {
+                        time: 2000 //2s后自动关闭
+                    });
+                } else {
+                    detail['grade'] = grade.val();
+                    detail['judgement'] = judgement.val();
+                    parent.find('.my-assessment-origin').hide();
+                    obj.del();
+                }
+            }
+        });
+
         /**
          * 判断是否为数字
          * @param s
@@ -148,7 +196,7 @@
         }
 
         /**
-         *
+         *计算json数组长度
          * @param obj
          * @returns {number}
          * @constructor
@@ -160,5 +208,16 @@
             }
             return size;
         }
+
+        //p判断json数据合法性
+        function isJsonValidate(json) {
+            for (var key in json) {
+                var obj = json[key];
+                if (!obj['grade'] || !obj['judgement'])
+                    return false;
+            }
+            return true;
+        }
     })
+
 </script>
