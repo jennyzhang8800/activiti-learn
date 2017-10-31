@@ -6,6 +6,7 @@ import com.activiti.common.kafka.MailProducer;
 import com.activiti.common.utils.ActivitiHelper;
 import com.activiti.common.utils.CommonUtil;
 import com.activiti.common.utils.ConstantsUtils;
+import com.activiti.common.utils.HttpClientUtil;
 import com.activiti.mapper.AdminMapper;
 import com.activiti.mapper.UserMapper;
 import com.activiti.mapper.VerifyTaskMapper;
@@ -26,6 +27,7 @@ import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -90,14 +92,17 @@ public class UserController {
             return email.equals(userRole.getEmail());
         })) throw new Exception("身为管理员的你不能提交作业！！！");
         StudentWorkInfo studentWorkInfo = new StudentWorkInfo(courseCode, email, workDetail, new Date());
-        User user = new User(commonUtil.getRandomUserName(), email, courseCode);
+        studentWorkInfo.setUserName((String) request.getSession().getAttribute("userName"));
+        studentWorkInfo.setUserType((String) request.getSession().getAttribute("userType"));
+//        User user = new User(commonUtil.getRandomUserName(), email, courseCode);
         try {
             userService.insertUserWork(studentWorkInfo);
         } catch (Exception e) {
             throw new Exception("你已经参与过答题了！！");
         }
-        userService.insertUser(user);
+//        userService.insertUser(user);
         ScheduleDto scheduleDto = scheduleService.selectScheduleTime(courseCode);
+        //查表judge_stu_work_info，获得当前还没有进入互评流程的人
         List<String> emailList = userMapper.selectNonDistributeUser(courseCode);
         //如果满了人数默认100人则异步启动流程
         if (null != emailList && emailList.size() >= scheduleDto.getDistributeMaxUser()) {
@@ -112,6 +117,9 @@ public class UserController {
         modelMap.put("workDetail", workDetail);
         modelMap.put("email", email);
         mailProducer.send(new EmailDto(email, EmailType.html, "答题成功", commonUtil.applyDataToView(modelMap, ConstantsUtils.successAnswerFtl)));
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("studentWorkInfo", studentWorkInfo);
+        asyncTasks.asyncTask(jsonObject, "commitWorkToGitlab");
         return studentWorkInfo;
     }
 
@@ -165,13 +173,15 @@ public class UserController {
         JSONObject response = commonService.getQAFromGitHub(scheduleDto.getGithubAddress());
         List<StudentWorkInfo> workInfoList = new ArrayList<>();
         JSONArray jsonArray = activitiHelper.selectWorkListToJudge(email, courseCode);
+        //到数据库表中查詢需要评论的作業信息
         jsonArray.forEach(index -> {
             workInfoList.add(userService.selectStudentWorkInfo(new StudentWorkInfo(courseCode, index.toString())));
         });
         if ("true".equals(studentWorkInfo.getDistributeStatus()) && null == studentWorkInfo.getJoinJudgeTime() && workInfoList.size() == 0)
             throw new Exception("您已经错过了互评机会");
-        response.put("workList", workInfoList);
-        return response;
+        JSONObject jsonObject = JSON.parseObject(response.toJSONString());
+        jsonObject.put("workList", workInfoList);
+        return jsonObject;
     }
 
     /**
@@ -195,16 +205,31 @@ public class UserController {
         int judgeLimitTimes = scheduleDto.getJudgeTimes();
         JSONObject judgeList = JSON.parseObject(judge);
         List<JudgementLs> judgementLsList = new ArrayList<>();
+        List<JSONObject>jsonObjectList=new ArrayList<>();
         judgeList.keySet().forEach(key -> {
             JSONObject jsonObject = (JSONObject) judgeList.get(key);
-            judgementLsList.add(new JudgementLs(courseCode,
-                    email, key, Double.valueOf(jsonObject.get("grade").toString()),(String)jsonObject.get("judgement")));
+            JudgementLs judgementLs = new JudgementLs(courseCode,
+                    email, key, Double.valueOf(jsonObject.get("grade").toString()), (String) jsonObject.get("judgement"));
+            judgementLsList.add(judgementLs);
             List<JudgementLs> judgementLsList1 = judgementService.selectJudgementLs(new JudgementLs(courseCode, key));  //查询和这个人相关的互评流水
             if (judgementLsList1 != null && judgementLsList1.size() + 1 == judgeLimitTimes) {  //这个人被别人评价次数够了，计算他的最终分数
                 double finalGrade = commonUtil.getMiddleNum(Double.valueOf(jsonObject.get("grade").toString()), judgementLsList1);
-                judgementService.updateStuGrade(new StudentWorkInfo(courseCode, key, finalGrade));  //更新成绩
+                StudentWorkInfo studentWorkInfo = new StudentWorkInfo(courseCode, key, finalGrade, "student");
+                judgementLsList1.add(judgementLs);
+                judgementService.updateStuGrade(studentWorkInfo);  //更新成绩
+                studentWorkInfo = judgementService.selectStudentWorkInfo(studentWorkInfo);
+                JSONObject object = new JSONObject();
+                object.put("studentWorkInfo", studentWorkInfo);
+                object.put("judgementLsList", judgementLsList1);
+                jsonObjectList.add(object);
             }
         });
+        //提交成绩到gitlab
+        try {
+            asyncTasks.asyncTask(jsonObjectList, "updateGradeToGitlab");
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         judgementService.insertJudgementLs(judgementLsList);   //插入互评流水
         judgementService.updateStuJudgeTime(new StudentWorkInfo(courseCode, email, new Date()));  //更新这名用户参与互评的时间
         activitiHelper.completeTask(email, courseCode);
@@ -336,6 +361,16 @@ public class UserController {
         return jsonObject;
     }
 
+    /**
+     * 管理员批改成绩
+     *
+     * @param email
+     * @param courseCode
+     * @param grade
+     * @param request
+     * @return
+     * @throws Exception
+     */
     @ResponseBody
     @RequestMapping("/insertAdminJudgementResult")
     @ApiAnnotation
@@ -346,8 +381,92 @@ public class UserController {
         if (!commonUtil.isManageRole(CommonUtil.getEmailFromSession(request))) throw new Exception("非管理员不得查看！");
         String judgerEmail = CommonUtil.getEmailFromSession(request);
         verifyTaskMapper.updateTask(new VerifyTask(email, "done", courseCode, grade, judgerEmail));
-        judgementService.updateStuGrade(new StudentWorkInfo(courseCode, email, grade));  //更新成绩
+        StudentWorkInfo studentWorkInfo = new StudentWorkInfo(courseCode, email, grade, "teacher");
+        judgementService.updateStuGrade(studentWorkInfo);  //更新成绩
+        studentWorkInfo = judgementService.selectStudentWorkInfo(studentWorkInfo);
+        JSONObject object = new JSONObject();
+        object.put("studentWorkInfo", studentWorkInfo);
+        object.put("judgementLsList", judgementService.selectJudgementLs(new JudgementLs(courseCode, email)));
+        try {
+            asyncTasks.asyncTask(object, "teacherUpdateGradeToGitlab");
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         return "更新成绩成功";
     }
+
+    /**
+     * 申请让老师批改作业
+     *
+     * @param courseCode
+     * @param request
+     * @return
+     */
+    @ResponseBody
+    @RequestMapping("/ackTeacherVerify")
+    @ApiAnnotation
+    public Object ackTeacherVerify(@RequestParam(value = "courseCode") String courseCode, HttpServletRequest request) throws Exception {
+        String email = CommonUtil.getEmailFromSession(request);
+        ScheduleDto scheduleDto = scheduleService.selectScheduleTime(courseCode);
+        StudentWorkInfo studentWorkInfo = userService.selectStudentWorkInfo(new StudentWorkInfo(courseCode, email));
+        if ("".equals(scheduleDto.getIsAppeal())) throw new Exception("该课程不允许成绩审核");
+        if (null == studentWorkInfo.getJoinJudgeTime()) throw new Exception("由于您没有参加互评，不能参与成绩审核");
+        if (null == studentWorkInfo.getGrade()) throw new Exception("由于你的成绩没有被足够多的人批改，现在转到由老师亲自批改，请耐心等待");
+        if ("yes".equals(studentWorkInfo.getAskToVerify())) throw new Exception("你已经申请过了");
+        activitiHelper.startTeacherVerify(studentWorkInfo);
+        return "教师将尽快为你重新修批改作业";
+    }
+
+    /**
+     * 查看老师所有需要审核的任务
+     *
+     * @param request
+     * @return
+     * @throws Exception
+     */
+    @ResponseBody
+    @RequestMapping("/selectAllTeacherTask")
+    @ApiAnnotation
+    public Object selectAllTeacherTask(HttpServletRequest request) throws Exception {
+        JSONArray jsonArray;
+        if (!commonUtil.isManageRole(CommonUtil.getEmailFromSession(request))) throw new Exception("非管理员不可以调用");
+        jsonArray = activitiHelper.selectAllTeacherTask();
+        return jsonArray;
+    }
+
+    /**
+     * 完成老师任务
+     *
+     * @param taskId
+     * @param courseCode
+     * @param emailAddress
+     * @param grade
+     * @param request
+     * @return
+     * @throws Exception
+     */
+    @ResponseBody
+    @RequestMapping("/finishTeacherVerifyTask")
+    @ApiAnnotation
+    public Object finishTeacherVerifyTask(@RequestParam(value = "taskId") String taskId,
+                                          @RequestParam(value = "courseCode") String courseCode,
+                                          @RequestParam(value = "emailAddress") String emailAddress,
+                                          @RequestParam(value = "grade") String grade, HttpServletRequest request) throws Exception {
+        StudentWorkInfo studentWorkInfo = new StudentWorkInfo(courseCode, emailAddress, Double.valueOf(grade), "teacher");
+        judgementService.updateStuGrade(studentWorkInfo);  //更新成绩
+        activitiHelper.finishTeacherVerifyTask(taskId);
+        studentWorkInfo = judgementService.selectStudentWorkInfo(studentWorkInfo);
+        JSONObject object = new JSONObject();
+        object.put("studentWorkInfo", studentWorkInfo);
+        object.put("put", true);
+        object.put("judgementLsList", judgementService.selectJudgementLs(new JudgementLs(courseCode, emailAddress)));
+        try {
+            asyncTasks.asyncTask(object, "teacherUpdateGradeToGitlab");
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return "成功";
+    }
+
 }
 

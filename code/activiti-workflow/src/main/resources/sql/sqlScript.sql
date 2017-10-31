@@ -13,6 +13,7 @@ SET FOREIGN_KEY_CHECKS = 0;
 
 -- ----------------------------
 -- Table structure for user
+-- 己废除
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS JUDGE_STU_INFO (
   USER_ID       INT(11)     NOT NULL AUTO_INCREMENT,
@@ -28,18 +29,20 @@ CREATE TABLE IF NOT EXISTS JUDGE_STU_INFO (
 
 -- ----------------------------
 -- Table structure for scheduleTime
+-- 题目与工作流配置表
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS JUDGE_SCHEDULE_TIME (
   COURSE_NAME         VARCHAR(50)  NOT NULL,
   COURSE_CODE         VARCHAR(20)  NOT NULL,
-  JUDGE_START_TIME    DATETIME      DEFAULT NULL,
-  JUDGE_END_TIME      DATETIME      DEFAULT NULL,
-  AUDIT_START_TIME    DATETIME      DEFAULT NULL,
-  AUDIT_END_TIME      DATETIME      DEFAULT NULL,
-  PUBLISH_TIME        DATETIME      DEFAULT NULL,
-  JUDGE_TIMES         INT(8)        DEFAULT 4,
-  DISTRIBUTE_MAX_USER INT(8)        DEFAULT 100,
-  TIMEOUT             VARBINARY(50) DEFAULT 'PT7D',
+  JUDGE_START_TIME    DATETIME    DEFAULT NULL,
+  JUDGE_END_TIME      DATETIME    DEFAULT NULL,
+  AUDIT_START_TIME    DATETIME    DEFAULT NULL,
+  AUDIT_END_TIME      DATETIME    DEFAULT NULL,
+  PUBLISH_TIME        DATETIME    DEFAULT NULL,
+  JUDGE_TIMES         INT(8)      DEFAULT 4,
+  DISTRIBUTE_MAX_USER INT(8)      DEFAULT 100,
+  TIMEOUT             VARCHAR(50) DEFAULT 'PT7D',
+  IS_APPEAL           VARCHAR(10) DEFAULT 'no',
   GITHUB_ADDRESS      VARCHAR(100) NOT NULL,
   UNIQUE INDEX index_COURSE_CODE (COURSE_CODE),
   PRIMARY KEY (COURSE_CODE)
@@ -49,6 +52,7 @@ CREATE TABLE IF NOT EXISTS JUDGE_SCHEDULE_TIME (
 
 -- ----------------------------
 -- Table for record student`s workInfo
+-- 学生作业表
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS JUDGE_STU_WORK_INFO (
   COURSE_CODE       VARCHAR(20)   NOT NULL,
@@ -57,6 +61,9 @@ CREATE TABLE IF NOT EXISTS JUDGE_STU_WORK_INFO (
   LAST_COMMIT_TIME  DATETIME      NOT NULL,
   GRADE             DOUBLE        DEFAULT NULL,
   JUDGE_TYPE        VARCHAR(10)   DEFAULT NULL,
+  ASK_TO_VERIFY   VARCHAR(10)   DEFAULT 'no',
+  USER_NAME         VARCHAR(50)   DEFAULT NULL,
+  USER_TYPE         VARCHAR(50)   DEFAULT NULL,
   JUDGE_TIMES       INT(8)        DEFAULT 0,
   JOIN_JUDGE_TIME   DATETIME      DEFAULT NULL,
   DISTRIBUTE_STATUS VARBINARY(10) DEFAULT 'false',
@@ -68,6 +75,7 @@ CREATE TABLE IF NOT EXISTS JUDGE_STU_WORK_INFO (
 
 -- ----------------------------
 -- Table for record judgement_ls
+-- 互评流水表
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS JUDGE_JUDGEMENT_LS (
   COURSE_CODE      VARCHAR(20) NOT NULL,
@@ -84,10 +92,12 @@ CREATE TABLE IF NOT EXISTS JUDGE_JUDGEMENT_LS (
 
 -- ----------------------------
 -- Table for record JUDGE_USER_ROLE
+-- 管理员用户表
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS JUDGE_USER_ROLE (
   ID      INT(8)      NOT NULL,
   EMAIL   VARCHAR(30) NOT NULL,
+  ROLE    VARCHAR(30) DEFAULT 'teacher',
   REMARKS VARCHAR(50),
   PRIMARY KEY (EMAIL)
 )
@@ -96,6 +106,7 @@ CREATE TABLE IF NOT EXISTS JUDGE_USER_ROLE (
 
 -- ----------------------------
 -- Table for record JUDGE_INVOKE_LOG
+-- 接口调用日志表
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS JUDGE_INVOKE_LOG (
   UUID        BIGINT,
@@ -112,6 +123,7 @@ CREATE TABLE IF NOT EXISTS JUDGE_INVOKE_LOG (
 
 -- ----------------------------
 -- Table for record JUDGE_EMAIL_LOG
+-- 邮件日志表
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS JUDGE_EMAIL_LOG (
   RECEIVE_ADDRESS VARCHAR(50),
@@ -129,7 +141,8 @@ CREATE TABLE IF NOT EXISTS JUDGE_EMAIL_LOG (
   DEFAULT CHARSET = utf8;
 
 -- ----------------------------
--- Table for record JUDGE_EMAIL_LOG
+-- Table for  JUDGE_VERIFY_TASK
+-- 教师批改作业表
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS JUDGE_VERIFY_TASK (
   EMAIL        VARCHAR(50),

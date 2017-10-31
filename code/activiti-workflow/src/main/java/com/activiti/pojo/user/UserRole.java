@@ -11,6 +11,7 @@ public class UserRole implements Serializable {
     private int id;
     private String email;
     private String remarks;  //备注
+    private String role;
 
     public UserRole() {
     }
@@ -19,6 +20,14 @@ public class UserRole implements Serializable {
         this.id = id;
         this.email = email;
         this.remarks = remarks;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 
     public int getId() {

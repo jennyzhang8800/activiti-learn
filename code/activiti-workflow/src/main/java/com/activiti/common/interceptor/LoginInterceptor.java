@@ -10,6 +10,9 @@ import org.springframework.web.servlet.ModelAndView;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+/**
+ * 登录拦截器
+ */
 public class LoginInterceptor implements HandlerInterceptor {
     private final Logger logger = LoggerFactory.getLogger(HandlerInterceptor.class);
     private static String env;
@@ -32,12 +35,16 @@ public class LoginInterceptor implements HandlerInterceptor {
         String email = CommonUtil.getEmailFromSession(httpServletRequest);
         logger.info("{user=" + email + "}>>>START HTTP REQUEST:" + httpServletRequest.getRequestURL());
         if ("".equals(email) || null == email) {
-            httpServletResponse.sendRedirect("login?redirectUrl=" + httpServletRequest.getServletPath());
+            String queryString = httpServletRequest.getQueryString();
+            if (null != queryString && !"".equals(queryString))
+                httpServletResponse.sendRedirect("login?redirectUrl=" + httpServletRequest.getServletPath() + "?" + queryString);
+            else
+                httpServletResponse.sendRedirect("login?redirectUrl=" + httpServletRequest.getServletPath());
             return false;
         }
-        String uuid =(String) httpServletRequest.getSession().getAttribute(ConstantsUtils.loginAbutmentRedisStore + email);
+        String uuid = (String) httpServletRequest.getSession().getAttribute(ConstantsUtils.loginAbutmentRedisStore + email);
         if ("pro".equals(env) && (null == uuid || "".equals(uuid))) {
-           throw new Exception("非法请求！！！！");
+            throw new Exception("非法请求！！！！");
         }
         return true;
     }

@@ -9,6 +9,9 @@ import com.activiti.pojo.user.StudentWorkInfo;
 import com.activiti.pojo.user.UserRole;
 import com.activiti.service.ScheduleService;
 import com.activiti.service.UserService;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,7 +76,12 @@ public class IndexController {
      * @return
      */
     @RequestMapping("/index")
-    public String index() {
+    public String index(@RequestParam(value = "view", required = false) String view,
+                        @RequestParam(value = "attach", required = false) String attach, ModelMap modelMap) {
+        if (null != view && !"".equals(view)) {
+            modelMap.put("initView", view);
+            modelMap.put("initViewAttach", attach);
+        }
         return "index";
     }
 
@@ -135,8 +143,18 @@ public class IndexController {
      * @return
      */
     @RequestMapping("/answer")
-    public String answer(HttpServletRequest request, ModelMap modelMap) {
-        List<ScheduleDto> scheduleDtoList = scheduleMapper.selectAllOfScheduleTime();
+    public String answer(@RequestParam(value = "attach", required = false) String attach,
+                         HttpServletRequest request, ModelMap modelMap) {
+        List<ScheduleDto> scheduleDtoList = new ArrayList<>();
+        if (null != attach && !"".equals(attach)) {
+            ScheduleDto scheduleDto = scheduleMapper.selectScheduleTime(attach);
+            if (null == scheduleDto) {
+                modelMap.put("errorMessage", "题目" + attach + "不存在");
+                scheduleDtoList = scheduleMapper.selectAllOfScheduleTime();
+            } else
+                scheduleDtoList.add(scheduleDto);
+        } else
+            scheduleDtoList = scheduleMapper.selectAllOfScheduleTime();
         modelMap.put("scheduleDtoList", scheduleDtoList);
         return "submodule/answer";
     }
@@ -162,7 +180,7 @@ public class IndexController {
     }
 
     /**
-     * 成绩审核页面
+     * 成绩批改页面
      *
      * @param request
      * @return
@@ -170,6 +188,17 @@ public class IndexController {
     @RequestMapping("/judgement")
     public String judgement(HttpServletRequest request) {
         return "submodule/judgement";
+    }
+
+    /**
+     * 成绩审核页面
+     *
+     * @param request
+     * @return
+     */
+    @RequestMapping("/verifyTask")
+    public String verifyTask(HttpServletRequest request) {
+        return "submodule/verifyTask";
     }
 
     /**
@@ -249,8 +278,16 @@ public class IndexController {
                                 @RequestParam("redirectUrl") String redirectUrl,
                                 @RequestParam("uuid") String uuid,
                                 HttpServletRequest request) {
-        if (uuid.equals(redisCommonUtil.get(ConstantsUtils.loginAbutmentRedisStore + email).toString()))
-            request.getSession().setAttribute(ConstantsUtils.loginAbutmentRedisStore + email, uuid);
+        String cache = redisCommonUtil.get(ConstantsUtils.loginAbutmentRedisStore + email).toString();
+        logger.info("loginAbutment>>>>>>>>>>>>=" + email + ">>>>>>>>" + uuid + ">>>>>>>>>" + redirectUrl);
+        if (null != cache && !"".equals(cache)) {
+            JSONObject jsonObject = JSON.parseObject(cache);
+            if (uuid.equals(jsonObject.getString("uuid"))) {
+                request.getSession().setAttribute("userName", jsonObject.getString("userName"));
+                request.getSession().setAttribute("userType", jsonObject.getString("userType"));
+                request.getSession().setAttribute(ConstantsUtils.loginAbutmentRedisStore + email, uuid);
+            }
+        }
         request.getSession().setAttribute(ConstantsUtils.sessionEmail, email);
         return "redirect:" + redirectUrl;
     }

@@ -10,6 +10,9 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.util.Map;
 
+/**
+ * freemarker 前端和后台数据交互（判断当前用户类型)
+ */
 @Component("identityDirective")
 public class IdentityDirective implements TemplateDirectiveModel {
     @Autowired

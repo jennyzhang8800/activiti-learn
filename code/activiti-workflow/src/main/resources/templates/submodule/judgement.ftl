@@ -1,6 +1,6 @@
 <div class="my-judgement">
     <fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
-        <legend>待审核的作业</legend>
+        <legend>待批改的作业（针对参加过互评但是没有成绩的学生）</legend>
         <div>
             <table class="myJudgementWaitTable" lay-filter="myJudgementWaitTable">
             </table>
@@ -9,7 +9,7 @@
     </fieldset>
     <br>
     <fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
-        <legend>已经审核的作业</legend>
+        <legend>已经批改的作业</legend>
         <div>
             <table class="myJudgementDoneTable">
             </table>
@@ -30,7 +30,7 @@
             $.ajax({
                 url: './api/user/selectMyJudgementWait',
                 data: {status: status},
-                type:"POST",
+                type: "POST",
                 jsonType: 'json',
                 success: function (data) {
                     if (!data.success) {
@@ -90,7 +90,7 @@
             $.ajax({
                 url: './api/user/selectMyJudgementWait',
                 data: {status: status},
-                type:"POST",
+                type: "POST",
                 jsonType: 'json',
                 success: function (data) {
                     if (!data.success) {
@@ -143,7 +143,7 @@
                 $.ajax({
                     url: './api/user/insertAdminJudgementResult',
                     data: data,
-                    type:"POST",
+                    type: "POST",
                     dateType: 'json',
                     success: function (result) {
                         if (!result.success) {

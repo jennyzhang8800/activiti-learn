@@ -56,7 +56,7 @@ public class CommonServiceImpl implements CommonService {
     }
 
     @Override
-    @Cacheable(value = "ehCache300", keyGenerator = "keyGenerator")
+//    @Cacheable(value = "ehCache300", keyGenerator = "keyGenerator")
     public List<Analysis> selectAllStudentWorkInfo(String courseCode) {
         return analysisMapper.selectAllStudentWorkInfo(courseCode);
     }
@@ -68,7 +68,7 @@ public class CommonServiceImpl implements CommonService {
      * @return
      */
     @Override
-    @Cacheable(value = "ehCache300", keyGenerator = "keyGenerator")
+//    @Cacheable(value = "ehCache300", keyGenerator = "keyGenerator")
     public JSONObject getStudentCommitTimeAnalysis(String courseCode) {
         JSONObject jsonObject = new JSONObject();
         JSONObject list = new JSONObject();
@@ -87,6 +87,26 @@ public class CommonServiceImpl implements CommonService {
         });
         jsonObject.put("date", dateArray);
         jsonObject.put("data", dataArray);
+        return jsonObject;
+    }
+
+    /**
+     * 学生成绩分析
+     *
+     * @param courseCode
+     * @return
+     */
+    @Override
+    public JSONObject getStudentCommitGradeAnalysis(String courseCode) {
+        JSONObject jsonObject = new JSONObject();
+        selectAllStudentWorkInfo(courseCode).forEach(analysis -> {
+            String grade = String.valueOf((int) analysis.getGrade());
+            if (jsonObject.containsKey(grade)) {
+                jsonObject.put(grade, (int) jsonObject.get(grade) + 1);
+            } else {
+                jsonObject.put(grade, 1);
+            }
+        });
         return jsonObject;
     }
 }

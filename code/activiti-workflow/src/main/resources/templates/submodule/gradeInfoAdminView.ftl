@@ -64,6 +64,7 @@
                                             cols: [[ //标题栏
                                                 {field: 'courseCode', title: '题号', width: 150},
                                                 {field: 'emailAddress', title: '邮箱地址', width: 200},
+                                                {field: 'userName', title: '用户名', width: 200},
                                                 {field: 'workDetail', title: '作业详情', width: 860},
                                                 {field: 'lastCommitTimeString', title: '提交时间', width: 200},
                                                 {field: 'joinJudgeTimeString', title: '参与互评时间', width: 200},

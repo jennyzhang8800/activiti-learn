@@ -157,4 +157,12 @@ public interface UserMapper {
      * @return
      */
     int updateDistributeStatus(@Param("courseCode") String courseCode, @Param("email") String email);
+
+    /**
+     * 請老師审核
+     * @param courseCode
+     * @param email
+     * @return
+     */
+    int askToVerify(@Param("courseCode") String courseCode, @Param("email") String email);
 }

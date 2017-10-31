@@ -35,9 +35,9 @@
     </delete>
 
     <insert id="insertUserWork" parameterType="com.activiti.pojo.user.StudentWorkInfo">
-        INSERT INTO judge_stu_work_info (COURSE_CODE, EMAIL_ADDRESS, WORK_DETAIL, LAST_COMMIT_TIME)
+        INSERT INTO judge_stu_work_info (COURSE_CODE, EMAIL_ADDRESS, WORK_DETAIL, LAST_COMMIT_TIME, USER_NAME, USER_TYPE)
         VALUES (
-            #{courseCode}, #{emailAddress}, #{workDetail}, #{lastCommitTime}
+            #{courseCode}, #{emailAddress}, #{workDetail}, #{lastCommitTime}, #{userName}, #{userType}
         )
     </insert>
 
@@ -118,6 +118,12 @@
     <update id="updateDistributeStatus" parameterType="string">
         UPDATE judge_stu_work_info
         SET DISTRIBUTE_STATUS = 'true'
+        WHERE COURSE_CODE = #{courseCode} AND EMAIL_ADDRESS = #{email}
+    </update>
+
+    <update id="askToVerify" parameterType="string">
+        UPDATE judge_stu_work_info
+        SET ASK_TO_VERIFY = 'yes'
         WHERE COURSE_CODE = #{courseCode} AND EMAIL_ADDRESS = #{email}
     </update>
 

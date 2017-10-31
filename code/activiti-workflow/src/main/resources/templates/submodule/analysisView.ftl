@@ -35,7 +35,7 @@
          * @param param  数据
          * @param courseCode  数据
          */
-        var drawCommitTimeView = function (id, param,courseCode) {
+        var drawCommitTimeView = function (id, param, courseCode) {
             // 基于准备好的dom，初始化echarts实例
             var myChart = echarts.init(document.getElementById(id));
             var date = param.date;
@@ -49,7 +49,7 @@
                 },
                 title: {
                     left: 'center',
-                    text: '学生提交时间段折线图('+courseCode+')'
+                    text: '学生提交时间段折线图(' + courseCode + ')'
                 },
                 toolbox: {
                     feature: {
@@ -117,18 +117,97 @@
         };
 
         /**
+         * 画成绩分布图
+         * */
+        var drawCommitGradeView = function (id, param, courseCode) {
+            // 基于准备好的dom，初始化echarts实例
+            var finalData = [];
+            var myChart = echarts.init(document.getElementById(id));
+            for (var t in  param){
+                finalData.push({value: param[t], name: t+'分'})
+            }
+            option = {
+                backgroundColor: '#2c343c',
+
+                title: {
+                    text: '学生成绩分布饼图('+courseCode+')',
+                    left: 'center',
+                    top: 20,
+                    textStyle: {
+                        color: '#ccc'
+                    }
+                },
+
+                tooltip: {
+                    trigger: 'item',
+                    formatter: "{a} <br/>{b} : {c} ({d}%)"
+                },
+
+                visualMap: {
+                    show: false,
+                    min: 80,
+                    max: 600,
+                    inRange: {
+                        colorLightness: [0, 1]
+                    }
+                },
+                series: [
+                    {
+                        name: '成绩分布',
+                        type: 'pie',
+                        radius: '55%',
+                        center: ['50%', '50%'],
+                        data:finalData.sort(function (a, b) { return a.value - b.value; }),
+                        roseType: 'radius',
+                        label: {
+                            normal: {
+                                textStyle: {
+                                    color: 'rgba(255, 255, 255, 0.3)'
+                                }
+                            }
+                        },
+                        labelLine: {
+                            normal: {
+                                lineStyle: {
+                                    color: 'rgba(255, 255, 255, 0.3)'
+                                },
+                                smooth: 0.2,
+                                length: 10,
+                                length2: 20
+                            }
+                        },
+                        itemStyle: {
+                            normal: {
+                                color: '#c23531',
+                                shadowBlur: 200,
+                                shadowColor: 'rgba(0, 0, 0, 0.5)'
+                            }
+                        },
+
+                        animationType: 'scale',
+                        animationEasing: 'elasticOut',
+                        animationDelay: function (idx) {
+                            return Math.random() * 200;
+                        }
+                    }
+                ]
+            };
+            myChart.setOption(option);
+        };
+
+        /**
          *  ajax 请求
-         * @param url
-         * @param courseCode
-         * @param id
-         * @param cb
+         * @param url 请求URL
+         * @param courseCode  课程代码
+         * @param id  dom元素id
+         * @param cb  回掉函数
          */
         var ajaxGetData = function (url, courseCode, id, cb) {
             $.ajax({
                 url: url,
                 data: {courseCode: courseCode},
                 dataType: 'json',
-                type:"POST",
+                type: "POST",
                 async: false,
                 success: function (data) {
                     if (!data.success) {
@@ -137,7 +216,7 @@
                             content: '<p>' + data.errorMessage + '</p>'
                         })
                     } else {
-                        cb(id, data.data,courseCode)
+                        cb(id, data.data, courseCode)
                     }
                 }
             })
@@ -152,6 +231,15 @@
             ajaxGetData(url, courseCode, id, drawCommitTimeView)
         };
 
+        /**
+         * 画学生成绩分布图
+         * @param courseCode
+         */
+        var commitGradePainting = function (courseCode) {
+            var id = 'student-commit-grade-analysis', url = './api/common/getStudentCommitGradeAnalysis';
+            ajaxGetData(url, courseCode, id, drawCommitGradeView)
+        };
+
 
         /**
          * 点击事件
@@ -159,6 +247,7 @@
         $('.my-analysisView .my-analysis-courseBtn').on('click', function () {
             var courseCode = $(this).attr('courseCode');
             commitTimePainting(courseCode);
+            commitGradePainting(courseCode);
         });
 
         function moNi() {

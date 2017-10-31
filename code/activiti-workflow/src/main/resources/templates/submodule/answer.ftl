@@ -48,7 +48,7 @@
             $.ajax({
                 url: './api/common/getQAContent',
                 data: {courseCode: courseCode},
-                type:"POST",
+                type: "POST",
                 dataType: 'json',
                 success: function (data) {
                     $('.my-answer-question').val(data.data);
@@ -71,7 +71,7 @@
                     courseCode: courseCode,
                     workDetail: data.field.answer
                 },
-                type:"POST",
+                type: "POST",
                 dataType: 'json',
                 success: function (result) {
                     if (result.success) {
@@ -81,12 +81,19 @@
                         $('.my-answer .my-answer-answer').val('');
                     }
                     else
-                        layer.alert('<p>'+result.errorMessage+'<p>', {
+                        layer.alert('<p>' + result.errorMessage + '<p>', {
                             title: '提交失败'
                         });
                 }
             });
             return false;
         });
+        (function () {
+            var errorMessage = '${errorMessage!""}';
+            if (errorMessage)
+                layer.alert('<p>' + errorMessage + '<p>', {
+                    title: '提交失败'
+                });
+        })()
     })
 </script>

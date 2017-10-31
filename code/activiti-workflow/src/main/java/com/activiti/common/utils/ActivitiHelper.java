@@ -2,8 +2,11 @@ package com.activiti.common.utils;
 
 import com.activiti.common.kafka.MailProducer;
 import com.activiti.mapper.UserMapper;
+import com.activiti.pojo.email.EmailDto;
 import com.activiti.pojo.schedule.ScheduleDto;
+import com.activiti.pojo.user.StudentWorkInfo;
 import com.activiti.service.ScheduleService;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.activiti.engine.RuntimeService;
@@ -51,22 +54,25 @@ public class ActivitiHelper {
         Collections.shuffle(emailList);
         logger.info("启动作业分配流程");
         ScheduleDto scheduleDto = scheduleService.selectScheduleTime(courseCode);
-        int judgeTimes = scheduleDto.getJudgeTimes();
-        int countWork = emailList.size() - 1;
+        int judgeTimes = scheduleDto.getJudgeTimes();//每份作业被批改次数（默认为4）
+        int countWork = emailList.size();
+        //为每一个人分配要批改的作业
         emailList.forEach(email -> {
             int studentId = emailList.indexOf(email);
             JSONArray jsonArray = new JSONArray();
             for (int i = 1; i <= judgeTimes; i++) {
                 int id = studentId + i;
-                int result = id > countWork ? id - countWork : id;
+                int result = id >= countWork ? id - countWork : id;
                 jsonArray.add(emailList.get(result));
             }
+            //设置流程变量
             Map<String, Object> variables = new HashMap<>();
             variables.put("courseCode", courseCode);
             variables.put("assignee", email);
             variables.put("judgeEmailList", jsonArray.toJSONString());
             variables.put("timeout", scheduleDto.getTimeout());
             String businessKey = "assessment";
+            //启动流程
             ProcessInstance processInstance = runtimeService.startProcessInstanceByKey("assessmentWorkFlow", businessKey, variables);
             logger.info("用户" + email + ">>>>>>>>>>启动流程：" + processInstance.getId());
             userMapper.updateDistributeStatus(courseCode, email);
@@ -133,5 +139,48 @@ public class ActivitiHelper {
                 taskService.complete(taskId);
             }
         });
+    }
+
+    /**
+     * 启动教师审查流程
+     *
+     * @param studentWorkInfo
+     */
+    public void startTeacherVerify(StudentWorkInfo studentWorkInfo) {
+        String courseCode = studentWorkInfo.getCourseCode();
+        String email = studentWorkInfo.getEmailAddress();
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("studentWorkInfo", ((JSONObject) JSONObject.toJSON(studentWorkInfo)).toJSONString());
+        String businessKey = "verifyTaskBusinessKey";
+        ProcessInstance processInstance = runtimeService.startProcessInstanceByKey("verifyTask", businessKey, variables);
+        logger.info("用户" + email + ">>>>>>>>>>启动教师审核流程：" + processInstance.getId());
+        userMapper.askToVerify(courseCode, email);
+    }
+
+    /**
+     * 查询教师所有任务
+     */
+    public JSONArray selectAllTeacherTask() {
+        List<Task> list = taskService
+                .createTaskQuery()//
+                .taskAssignee("teacher")//个人任务的查询
+                .list();
+        JSONArray jsonArray = new JSONArray();
+        list.forEach(task -> {
+            String taskId = task.getId();
+            JSONObject studentWorkInfo = JSONObject.parseObject(taskService.getVariable(taskId, "studentWorkInfo").toString());
+            studentWorkInfo.put("taskId", taskId);
+            jsonArray.add(studentWorkInfo);
+        });
+        return jsonArray;
+    }
+
+    /**
+     * 结束任务
+     *
+     * @param taskId
+     */
+    public void finishTeacherVerifyTask(String taskId) {
+        taskService.complete(taskId);
     }
 }

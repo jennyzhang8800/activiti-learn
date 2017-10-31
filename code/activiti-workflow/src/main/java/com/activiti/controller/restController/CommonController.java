@@ -4,6 +4,7 @@ import com.activiti.common.aop.ApiAnnotation;
 import com.activiti.common.redis.RedisCommonUtil;
 import com.activiti.common.utils.CommonUtil;
 import com.activiti.common.utils.ConstantsUtils;
+import com.activiti.common.utils.HttpClientUtil;
 import com.activiti.mapper.ScheduleMapper;
 import com.activiti.mapper.ToolsMapper;
 import com.activiti.pojo.schedule.ScheduleDto;
@@ -13,6 +14,7 @@ import com.activiti.service.ScheduleService;
 import com.activiti.service.UserService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -30,6 +32,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/common")
 public class CommonController {
+    private final org.slf4j.Logger logger = LoggerFactory.getLogger(CommonController.class);
     @Autowired
     private CommonService commonService;
     @Autowired
@@ -44,6 +47,8 @@ public class CommonController {
     private RedisCommonUtil redisCommonUtil;
     @Autowired
     private UserService userService;
+    @Autowired
+    private HttpClientUtil httpClientUtil;
 
     /**
      * GitHub请求题目和答案
@@ -237,6 +242,18 @@ public class CommonController {
      * @return
      */
     @ResponseBody
+    @RequestMapping("/getStudentCommitGradeAnalysis")
+    @ApiAnnotation
+    public Object getStudentCommitGradeAnalysis(@RequestParam("courseCode") String courseCode) {
+        return commonService.getStudentCommitGradeAnalysis(courseCode);
+    }
+
+    /**
+     * 学生成绩分析
+     *
+     * @return
+     */
+    @ResponseBody
     @RequestMapping("/getStudentGradeAnalysis")
     @ApiAnnotation
     public Object getStudentGradeAnalysis(@RequestParam("courseCode") String courseCode) {
@@ -245,6 +262,7 @@ public class CommonController {
 
     /**
      * 对接
+     *
      * @param email
      * @return
      */
@@ -252,11 +270,20 @@ public class CommonController {
     @RequestMapping("/loginAbutment")
     @ApiAnnotation
     public Object loginAbutment(@RequestParam("email") String email,
+                                @RequestParam("userName") String userName,
                                 @RequestParam("userType") String userType,
-                                @RequestParam("password") String password) throws Exception {
-        if (!ConstantsUtils.password.equals(password)) throw new Exception("非法登录对接！！！！");
+                                @RequestParam("signature") String signature) throws Exception {
+        String mySignature = httpClientUtil.getMD5(email + userName + userType + ConstantsUtils.password).toLowerCase();
+        logger.info("loginAbutment get signature=" + signature + ",mySignature=" + mySignature);
+        if (!signature.equals(mySignature)) throw new Exception("非法登录对接！！！！");
         String uuid = String.valueOf(commonUtil.getSequenceId());
-        redisCommonUtil.put(ConstantsUtils.loginAbutmentRedisStore + email, uuid, 60);
+        JSONObject cache = new JSONObject();
+        cache.put("uuid", uuid);
+        cache.put("userName", userName);
+        cache.put("userType", userType);
+        cache.put("email", email);
+        logger.info("loginAbutment parameter is>>>>>>>>>>>>" + cache.toJSONString());
+        redisCommonUtil.put(ConstantsUtils.loginAbutmentRedisStore + email, cache.toJSONString(), 5);
         if ("staff".equals(userType))
             userService.insertUserRole(new UserRole(1, email, "staff"));
         JSONObject jsonObject = new JSONObject();

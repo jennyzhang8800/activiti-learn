@@ -15,11 +15,11 @@ import java.util.concurrent.ThreadPoolExecutor;
 @EnableAsync
 public class ExecutorConfig {
     /** Set the ThreadPoolExecutor's core pool size. */
-    private int corePoolSize = 10;
+    private int corePoolSize = 50;
     /** Set the ThreadPoolExecutor's maximum pool size. */
-    private int maxPoolSize = 200;
+    private int maxPoolSize = 400;
     /** Set the capacity for the ThreadPoolExecutor's BlockingQueue. */
-    private int queueCapacity = 10;
+    private int queueCapacity = 20;
 
 //    @Bean
 //    public Executor mySimpleAsync() {

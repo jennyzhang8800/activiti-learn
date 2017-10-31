@@ -30,6 +30,12 @@ public class FlowTakeListener implements ExecutionListener {
     @Autowired
     private JudgementService judgementService;
 
+    /**
+     * 互评超时监听器
+     *
+     * @param delegateExecution
+     * @throws Exception
+     */
     @Override
     public void notify(DelegateExecution delegateExecution) throws Exception {
         JSONArray jsonArray = new JSONArray();
@@ -44,7 +50,7 @@ public class FlowTakeListener implements ExecutionListener {
                 jsonArray1.forEach(a -> {
                     studentWorkInfoList.add(userService.selectStudentWorkInfo(new StudentWorkInfo(courseCode, a.toString())));
                 });
-                judgementService.updateStuGrade(new StudentWorkInfo(courseCode,task.getAssignee(),0d));
+                judgementService.updateStuGrade(new StudentWorkInfo(courseCode, task.getAssignee(), 0d));
                 studentWorkInfoList.forEach(studentWorkInfo -> {
                     List<JudgementLs> judgementLsList = judgementService.selectJudgementLs(new JudgementLs(courseCode, studentWorkInfo.getEmailAddress()));
                     int times = judgementLsList == null ? 0 : judgementLsList.size();

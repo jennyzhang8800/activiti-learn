@@ -15,6 +15,8 @@ public interface CommonService {
 
     JSONObject getStudentCommitTimeAnalysis(String courseCode);
 
+    JSONObject getStudentCommitGradeAnalysis(String courseCode);
+
     List<Analysis> selectAllStudentWorkInfo(String courseCode);
 
     JSONObject getStudentGradeAnalysis(String courseCode);

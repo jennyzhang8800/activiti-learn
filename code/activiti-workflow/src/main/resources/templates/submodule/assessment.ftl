@@ -39,7 +39,7 @@
                 </div>
             </div>
             <div class="layui-form-item">
-                <label class="layui-form-label">输入框</label>
+                <label class="layui-form-label">分数</label>
                 <div class="layui-input-block">
                     <input type="text" required lay-verify="required" placeholder="分数" autocomplete="off"
                            class="layui-input my-assessment-grade">
@@ -104,11 +104,12 @@
                             width: 3000,
                             cols: [[ //标题栏
                                 {field: 'courseCode', title: '题目ID', width: 100},
-                                {field: 'emailAddress', title: '邮箱', width: 220},
+                                {field: 'userName', title: '用户名', width: 100},
+                                {field: 'emailAddress', title: '邮箱', width: 250},
                                 {
                                     field: 'operation',
                                     title: '操作',
-                                    width: 150,
+                                    width: 200,
                                     templet: '#my-assessment-operation'
                                 }
                             ]],
@@ -162,7 +163,6 @@
             var grade = parent.find('.my-assessment-origin .my-assessment-grade');
             var emailAddress = obj.data.emailAddress;
             var detail = judgeGradeList[emailAddress];
-            console.log(detail);
             if (obj.event === 'answer') {
                 parent.find('.my-assessment-origin').show();
                 answer.val(obj.data.workDetail);
@@ -181,7 +181,6 @@
                     detail['grade'] = grade.val();
                     detail['judgement'] = judgement.val();
                     parent.find('.my-assessment-origin').hide();
-                    obj.del();
                 }
             }
         });

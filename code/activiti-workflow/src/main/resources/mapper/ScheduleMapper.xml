@@ -8,9 +8,12 @@
     </select>
 
     <insert id="insertScheduleTime" parameterType="com.activiti.pojo.schedule.ScheduleDto">
-        INSERT INTO judge_schedule_time (course_name, course_code, judge_start_time, judge_end_time, audit_start_time, audit_end_time, publish_time, github_address,distribute_max_user,TIMEOUT)
+        INSERT INTO judge_schedule_time (
+            course_name, course_code, judge_start_time, judge_end_time, audit_start_time, audit_end_time, publish_time, github_address, distribute_max_user, timeout,is_appeal
+        )
             VALUE (#{courseName}, #{courseCode}, #{judgeStartTime}, #{judgeEndTime},
-                   #{auditStartTime}, #{auditEndTime}, #{publishTime}, #{githubAddress},#{distributeMaxUser},#{timeout})
+                   #{auditStartTime}, #{auditEndTime}, #{publishTime}, #{githubAddress}, #{distributeMaxUser},
+                   #{timeout},#{isAppeal})
     </insert>
 
     <update id="updateScheduleTime" parameterType="com.activiti.pojo.schedule.ScheduleDto">

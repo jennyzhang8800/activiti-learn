@@ -23,8 +23,17 @@ public class ScheduleDto implements Serializable {
     private String githubAddress;   //题目地址
     private int distributeMaxUser;  //最大人数开始互拼
     private String timeout;  //互评超时时间
+    private String isAppeal;   //是否允许申诉    yes:允许   no:不允许   默认不允许
 
     public ScheduleDto() {
+    }
+
+    public String getIsAppeal() {
+        return isAppeal;
+    }
+
+    public void setIsAppeal(String isAppeal) {
+        this.isAppeal = isAppeal;
     }
 
     public String getTimeout() {
