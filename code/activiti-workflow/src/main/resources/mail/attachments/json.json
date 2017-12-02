@@ -1,0 +1,9 @@
+{
+  "courseName": "题目",
+  "courseCode": "题号",
+  "isAppeal": "是否允许学生申诉",
+  "distributeMaxUser": "开始互评人数",
+  "timeout": "超时时间",
+  "assessmentMinTimeSlot": "最小间隔时间",
+  "assessmentMaxTimeSlot": "最大间隔时间"
+}

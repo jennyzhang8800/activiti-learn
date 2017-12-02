@@ -24,8 +24,26 @@ public class ScheduleDto implements Serializable {
     private int distributeMaxUser;  //最大人数开始互拼
     private String timeout;  //互评超时时间
     private String isAppeal;   //是否允许申诉    yes:允许   no:不允许   默认不允许
+    private String assessmentMinTimeSlot;//互评第一个提交作业人与最后一个最小相隔时间
+    private String assessmentMaxTimeSlot;//互评第一个提交作业人与最后一个最大相隔时间
 
     public ScheduleDto() {
+    }
+
+    public String getAssessmentMinTimeSlot() {
+        return assessmentMinTimeSlot;
+    }
+
+    public void setAssessmentMinTimeSlot(String assessmentMinTimeSlot) {
+        this.assessmentMinTimeSlot = assessmentMinTimeSlot;
+    }
+
+    public String getAssessmentMaxTimeSlot() {
+        return assessmentMaxTimeSlot;
+    }
+
+    public void setAssessmentMaxTimeSlot(String assessmentMaxTimeSlot) {
+        this.assessmentMaxTimeSlot = assessmentMaxTimeSlot;
     }
 
     public String getIsAppeal() {

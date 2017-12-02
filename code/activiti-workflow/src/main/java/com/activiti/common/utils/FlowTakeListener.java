@@ -1,5 +1,6 @@
 package com.activiti.common.utils;
 
+import com.activiti.common.redis.RedisCommonUtil;
 import com.activiti.mapper.VerifyTaskMapper;
 import com.activiti.pojo.user.JudgementLs;
 import com.activiti.pojo.user.StudentWorkInfo;
@@ -29,6 +30,8 @@ public class FlowTakeListener implements ExecutionListener {
     private UserService userService;
     @Autowired
     private JudgementService judgementService;
+    @Autowired
+    private RedisCommonUtil redisCommonUtil;
 
     /**
      * 互评超时监听器
@@ -43,9 +46,10 @@ public class FlowTakeListener implements ExecutionListener {
         taskService.createTaskQuery().processInstanceBusinessKey(businessKey).list().forEach(task -> {
             if (delegateExecution.getProcessInstanceId().equals(task.getProcessInstanceId())) {
                 jsonArray.add(task.getAssignee());
-                logger.info(task.getAssignee() + ">>>>>>>>>>>>>>>>>>>" + taskService.getVariable(task.getId(), "judgeEmailList").toString());
+//                logger.info(task.getAssignee() + ">>>>>>>>>>>>>>>>>>>" + taskService.getVariable(task.getId(), "judgeEmailList").toString());
                 String courseCode = taskService.getVariable(task.getId(), "courseCode").toString();
-                JSONArray jsonArray1 = JSONArray.parseArray(taskService.getVariable(task.getId(), "judgeEmailList").toString());
+//                JSONArray jsonArray1 = JSONArray.parseArray(taskService.getVariable(task.getId(), "judgeEmailList").toString());
+                JSONArray jsonArray1= JSONArray.parseArray(redisCommonUtil.get(ConstantsUtils.beginDistributeTask + courseCode + task.getAssignee()).toString());
                 List<StudentWorkInfo> studentWorkInfoList = new ArrayList<>();
                 jsonArray1.forEach(a -> {
                     studentWorkInfoList.add(userService.selectStudentWorkInfo(new StudentWorkInfo(courseCode, a.toString())));

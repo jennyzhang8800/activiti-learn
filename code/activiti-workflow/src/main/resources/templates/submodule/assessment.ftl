@@ -74,6 +74,7 @@
         var judgeCount;
         var courseCode;
         var parent = $('.my-assessment');
+        var emailFlag='';
         $('.my-assessment .my-assessment-courseBtn').on('click', function () {
             courseCode = $(this).attr('courseCode');
             parent.find('.my-assessment-courseCode span').html('  ' + courseCode);
@@ -104,8 +105,7 @@
                             width: 3000,
                             cols: [[ //标题栏
                                 {field: 'courseCode', title: '题目ID', width: 100},
-                                {field: 'userName', title: '用户名', width: 100},
-                                {field: 'emailAddress', title: '邮箱', width: 250},
+                                {field: 'emailAddress_fake', title: '邮箱', width: 250},
                                 {
                                     field: 'operation',
                                     title: '操作',
@@ -164,11 +164,17 @@
             var emailAddress = obj.data.emailAddress;
             var detail = judgeGradeList[emailAddress];
             if (obj.event === 'answer') {
+                emailFlag=emailAddress;
                 parent.find('.my-assessment-origin').show();
                 answer.val(obj.data.workDetail);
                 judgement.val(detail.judgement);
                 grade.val(detail.grade);
             } else {
+                if (emailFlag!==emailAddress){
+                    layer.msg('保存出错，请保存正在批改的作业', {
+                        time: 2000 //2s后自动关闭
+                    });
+                }
                 if (judgement.val() === '') {
                     layer.msg('请输入评语', {
                         time: 2000 //2s后自动关闭

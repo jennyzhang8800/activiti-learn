@@ -16,6 +16,22 @@
             <div id="myJudgementDonePage"></div>
         </div>
     </fieldset>
+    <div style="display: none" id="my-judge-details">
+        <div class="layui-form-item layui-form-text">
+            <label class="layui-form-label">题目</label>
+            <div class="layui-input-block">
+                <textarea class="layui-textarea question" name="" cols="" rows=""
+                          readonly></textarea>
+            </div>
+        </div>
+        <div class="layui-form-item layui-form-text">
+            <label class="layui-form-label">参考答案</label>
+            <div class="layui-input-block">
+                <textarea class="layui-textarea standardAnswer" name="" cols="" rows=""
+                          readonly></textarea>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -64,9 +80,15 @@
                                             {field: 'judgeTimes', title: '被打分次数', width: 100},
                                             {field: 'grade', title: '成绩', width: 100, edit: 'text'},
                                             {
+                                                field: 'details',
+                                                title: '题目详情',
+                                                width: 150,
+                                                templet: '#my-judgement-details'
+                                            },
+                                            {
                                                 field: 'commit',
                                                 title: '提交',
-                                                width: 300,
+                                                width: 150,
                                                 templet: '#my-judgement-commit'
                                             }
                                         ]],
@@ -163,6 +185,32 @@
                         }
                     }
                 })
+            }else if (obj.event === 'details') {
+                var courseCode = data.courseCode;
+                var id=$('#my-judge-details');
+                $.ajax({
+                    url: './api/common/selectCourseDetails',
+                    data: {courseCode: courseCode},
+                    type: "POST",
+                    dateType: 'json',
+                    success: function (result) {
+                        if (!result.success) {
+                            layer.open({
+                                title: '获取数据失败',
+                                content: '<p>' + result.errorMessage + '</p>'
+                            })
+                        } else {
+                            var details=result.data.details;
+                            id.find('.question').text(details.question);
+                            id.find('.standardAnswer').text(details.answer);
+                            layer.open({
+                                title: '题目详情',
+                                area: ['700px', '400px'],
+                                content: id.html()
+                            });
+                        }
+                    }
+                })
             }
         });
 
@@ -175,4 +223,8 @@
 
 <script type="text/html" id="my-judgement-commit">
     <a class="layui-btn layui-btn-danger layui-btn-mini" lay-event="commit">提交成绩</a>
+</script>
+
+<script type="text/html" id="my-judgement-details">
+    <a class="layui-btn layui-btn-danger layui-btn-mini" lay-event="details">点击查看详情</a>
 </script>

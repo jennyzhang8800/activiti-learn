@@ -18,8 +18,12 @@
     </fieldset>
 </div>
 
-<div style="display: none" id="activiti-test">
-    <img src=${request.contextPath}/mooc-workflow/img/activiti.png>
+<div style="display: none" id="judgement">
+    <img src=${request.contextPath}/mooc-workflow/img/judgement.png>
+</div>
+
+<div style="display: none" id="nojudgement">
+    <img src=${request.contextPath}/mooc-workflow/img/nojudgement.png>
 </div>
 
 <script>
@@ -80,10 +84,10 @@
                 }
             });
         }
-        
+
         setTimeout(function () {
             loadMyJobAnswerDoneTable();
-        },100);
+        }, 100);
 
         //已完成的答题任务监控工具条
         table.on('tool(myJobAnswerDoneTable)', function (obj) {
@@ -95,13 +99,13 @@
                     data: {courseCode: courseCode},
                     dataType: 'json',
                     success: function (result) {
-                        if (result.success){
+                        if (result.success) {
                             layer.open({
                                 title: '原题',
                                 shadeClose: true,
                                 content: '<p>' + result.data + '<p>'
                             });
-                        }else {
+                        } else {
                             layer.open({
                                 title: '请求出错',
                                 shadeClose: true,
@@ -112,13 +116,38 @@
                 })
             }
             if (obj.event === 'detail') {
+                var isAppeal = false;
+                var content = $('#nojudgement').html();
+                var area= ['1500px', '650px'];
+                $.ajax({
+                    type: 'POST',
+                    url: './api/common/isCourseAppeal',
+                    data: {courseCode: courseCode},
+                    dataType: 'json',
+                    async:false,
+                    success: function (result) {
+                        if (result.success) {
+                            isAppeal = result.data.isAppeal;
+                        } else {
+                            layer.open({
+                                title: '请求出错',
+                                shadeClose: true,
+                                content: '<p>' + result.errorMessage + '<p>'
+                            });
+                        }
+                    }
+                });
+                if (isAppeal==='yes') {
+                    content = $('#judgement').html();
+                    area= ['1300px', '870px'];
+                }
                 layer.open({
                     type: 1,
                     title: "流程图",
                     closeBtn: 1,
-                    area: ['750px', '280px'],
+                    area: area,
                     shadeClose: true,
-                    content: $('#activiti-test').html()
+                    content: content
                 });
             }
         });
@@ -170,7 +199,7 @@
 
         setTimeout(function () {
             loadAssessmentDone();
-        },500)
+        }, 500)
     });
 </script>
 

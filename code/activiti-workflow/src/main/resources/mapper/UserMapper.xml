@@ -115,6 +115,13 @@
         WHERE COURSE_CODE = #{courseCode} AND DISTRIBUTE_STATUS = 'false'
     </select>
 
+    <select id="selectAllNonDistributeUser" parameterType="string" resultType="com.activiti.pojo.user.StudentWorkInfo">
+        SELECT *
+        FROM judge_stu_work_info
+        WHERE COURSE_CODE = #{courseCode} AND DISTRIBUTE_STATUS = 'false'
+        ORDER BY LAST_COMMIT_TIME DESC
+    </select>
+
     <update id="updateDistributeStatus" parameterType="string">
         UPDATE judge_stu_work_info
         SET DISTRIBUTE_STATUS = 'true'

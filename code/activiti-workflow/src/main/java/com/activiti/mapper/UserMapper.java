@@ -150,6 +150,13 @@ public interface UserMapper {
     List<String> selectNonDistributeUser(String courseCode);
 
     /**
+     * 查询所有未分配作业的人
+     * @param courseCode
+     * @return
+     */
+    List<StudentWorkInfo> selectAllNonDistributeUser(String courseCode);
+
+    /**
      * 更新分配状态
      *
      * @param courseCode
@@ -160,6 +167,7 @@ public interface UserMapper {
 
     /**
      * 請老師审核
+     *
      * @param courseCode
      * @param email
      * @return

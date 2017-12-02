@@ -1,6 +1,7 @@
 package com.activiti.controller;
 
 import com.activiti.common.redis.RedisCommonUtil;
+import com.activiti.common.utils.ActivitiHelper;
 import com.activiti.common.utils.CommonUtil;
 import com.activiti.common.utils.ConstantsUtils;
 import com.activiti.mapper.ScheduleMapper;
@@ -12,6 +13,9 @@ import com.activiti.service.UserService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import org.activiti.engine.RepositoryService;
+import org.activiti.engine.repository.ProcessDefinition;
+import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,8 +25,10 @@ import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,6 +47,10 @@ public class IndexController {
     private ScheduleMapper scheduleMapper;
     @Autowired
     private RedisCommonUtil redisCommonUtil;
+    @Autowired
+    private ActivitiHelper activitiHelper;
+    @Autowired
+    RepositoryService repositoryService;
 
     /**
      * 登录页面
@@ -172,11 +182,30 @@ public class IndexController {
         scheduleMapper.selectAllOfScheduleTime().forEach(scheduleDto -> {
             String courseCode = scheduleDto.getCourseCode();
             StudentWorkInfo studentWorkInfo = userService.selectStudentWorkInfo(new StudentWorkInfo(courseCode, email));
-            if (null != studentWorkInfo && null == studentWorkInfo.getJoinJudgeTime())
-                scheduleDtoList.add(scheduleDto);
+            if (null != studentWorkInfo && null == studentWorkInfo.getJoinJudgeTime()) {
+                JSONArray jsonArray = activitiHelper.selectWorkListToJudge(email, courseCode, "new");
+                if (null != jsonArray && jsonArray.size() > 0)
+                    scheduleDtoList.add(scheduleDto);
+            }
         });
         modelMap.put("scheduleDtoList", scheduleDtoList);
         return "submodule/assessment";
+    }
+
+    /**
+     * 获取流程图
+     *
+     * @param pdid
+     * @param resource
+     * @param response
+     * @throws Exception
+     */
+    @RequestMapping("/showResource")
+    public void showResource(@RequestParam("pdid") String pdid, @RequestParam("resource") String resource, HttpServletResponse response) throws Exception {
+        ProcessDefinition def = repositoryService.createProcessDefinitionQuery().processDefinitionId(pdid).singleResult();
+        InputStream is = repositoryService.getResourceAsStream(def.getDeploymentId(), resource);
+        ServletOutputStream output = response.getOutputStream();
+        IOUtils.copy(is, output);
     }
 
     /**

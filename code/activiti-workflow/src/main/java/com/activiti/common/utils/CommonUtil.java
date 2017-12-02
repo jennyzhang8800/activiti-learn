@@ -380,6 +380,40 @@ public class CommonUtil {
     }
 
     /**
+     * 获取数字
+     *
+     * @param string
+     * @return
+     */
+    public int getNumFromString(String string) {
+        Pattern p = Pattern.compile("[^0-9]");
+        Matcher m = p.matcher(string);
+        String result = m.replaceAll("");
+        return Integer.valueOf(result);
+    }
+
+    /**
+     * 工作流配置时间格式应该一只
+     * @param scheduleDto
+     * @throws Exception
+     */
+    public void validateTimeRegexp(ScheduleDto scheduleDto) throws Exception {
+        scheduleDto.setAssessmentMaxTimeSlot(scheduleDto.getAssessmentMaxTimeSlot().trim());
+        scheduleDto.setAssessmentMinTimeSlot(scheduleDto.getAssessmentMinTimeSlot().trim());
+        scheduleDto.setTimeout(scheduleDto.getTimeout().trim());
+        String pattern = "PT(\\d+)[SMHD]";
+        String rightString = "正确示例：10秒钟:PT10S , 一天:PT1D  ,一小时:PT1H, 一分钟:PT1M";
+        int minLength = scheduleDto.getAssessmentMinTimeSlot().length();
+        int maxLength = scheduleDto.getAssessmentMaxTimeSlot().length();
+        if (!scheduleDto.getAssessmentMinTimeSlot().substring(minLength - 1, minLength).equals(scheduleDto.getAssessmentMaxTimeSlot().substring(maxLength - 1, maxLength)))
+            throw new Exception("最小间隔时间与最大时间间隔时间格式应该一致");
+        if (!scheduleDto.getAssessmentMinTimeSlot().matches(pattern))
+            throw new Exception("最小间隔时间格式不正确," + rightString);
+        if (!scheduleDto.getAssessmentMaxTimeSlot().matches(pattern)) throw new Exception("最大间隔时间格式不正确," + rightString);
+        if (!scheduleDto.getTimeout().matches(pattern)) throw new Exception("互评超时时间格式不正确," + rightString);
+    }
+
+    /**
      * 从session中获取Email
      *
      * @param request

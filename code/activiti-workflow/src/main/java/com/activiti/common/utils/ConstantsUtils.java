@@ -38,4 +38,8 @@ public class ConstantsUtils {
 
     public static final String password="workFlow_921691866422837248";
 
+    public static final String beginDistributeTask="beginDistributeTask";
+
+    public static final long beginDistributeTaskExpire=30*24*60*60;
+
 }

@@ -13,7 +13,11 @@ import com.activiti.service.CommonService;
 import com.activiti.service.ScheduleService;
 import com.activiti.service.UserService;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import org.activiti.engine.RepositoryService;
+import org.activiti.engine.repository.ProcessDefinition;
+import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,7 +25,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.UUID;
 
@@ -49,6 +57,8 @@ public class CommonController {
     private UserService userService;
     @Autowired
     private HttpClientUtil httpClientUtil;
+    @Autowired
+    RepositoryService repositoryService;
 
     /**
      * GitHub请求题目和答案
@@ -64,6 +74,41 @@ public class CommonController {
         if (null == scheduleDto) throw new Exception("本题目已经被老师撤销了！！！");
         String githubAddress = scheduleDto.getGithubAddress();
         return commonService.getQAFromGitHub(githubAddress).get("question");
+    }
+
+    /**
+     * 获取已经部署得流程实例
+     *
+     * @param page
+     * @param limit
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping("/getProcessLists")
+    @ResponseBody
+    @ApiAnnotation
+    public Object getProcessLists(@RequestParam(value = "page") int page,
+                                  @RequestParam(value = "limit") int limit) throws Exception {
+        JSONObject result = new JSONObject();
+        int total = 2;
+        result.put("total", total);
+        int firstRow = (page - 1) * limit;
+        List<ProcessDefinition> list = repositoryService.createProcessDefinitionQuery().listPage(firstRow, limit);
+        JSONArray jsonArray = new JSONArray();
+        list.forEach(processDefinition -> {
+            if ("answerToAssessment".equals(processDefinition.getKey()) || "answerToAssessmentNojudge".equals(processDefinition.getKey())) {
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("deploymentId", processDefinition.getDeploymentId());
+                jsonObject.put("id", processDefinition.getId());
+                jsonObject.put("name", processDefinition.getName());
+                jsonObject.put("resourceName", processDefinition.getResourceName());
+                jsonObject.put("key", processDefinition.getKey());
+                jsonObject.put("diagramResourceName", processDefinition.getDiagramResourceName());
+                jsonArray.add(jsonObject);
+            }
+        });
+        result.put("data", jsonArray);
+        return result;
     }
 
     /**
@@ -93,6 +138,7 @@ public class CommonController {
         ScheduleDto scheduleDto = jsonObject.toJavaObject(ScheduleDto.class);
         scheduleDto.setGithubAddress(commonUtil.generateGitHubUrl(Integer.valueOf(scheduleDto.getCourseCode())));
         String courseCode = scheduleDto.getCourseCode();
+        commonUtil.validateTimeRegexp(scheduleDto);
         if (null != scheduleService.selectScheduleTime(courseCode)) throw new Exception(courseCode + "该课程已经存在");
         if (null == courseCode) throw new Exception("courseCode字段不能为空");
         scheduleService.insertScheduleTime(scheduleDto);
@@ -288,6 +334,39 @@ public class CommonController {
             userService.insertUserRole(new UserRole(1, email, "staff"));
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("uuid", uuid);
+        return jsonObject;
+    }
+
+    /**
+     * 查询课程是否可以申诉
+     *
+     * @param courseCode
+     * @return
+     */
+    @ResponseBody
+    @RequestMapping("/isCourseAppeal")
+    @ApiAnnotation
+    public Object isCourseAppeal(@RequestParam("courseCode") String courseCode) {
+        ScheduleDto scheduleDto = scheduleService.selectScheduleTime(courseCode);
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("isAppeal", scheduleDto.getIsAppeal());
+        return jsonObject;
+    }
+
+    /**
+     * 题目详情
+     *
+     * @param courseCode
+     * @return
+     * @throws UnsupportedEncodingException
+     */
+    @ResponseBody
+    @RequestMapping("/selectCourseDetails")
+    @ApiAnnotation
+    public Object selectCourseDetails(@RequestParam("courseCode") String courseCode) throws UnsupportedEncodingException {
+        ScheduleDto scheduleDto = scheduleService.selectScheduleTime(courseCode);
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("details", commonService.getQAFromGitHub(scheduleDto.getGithubAddress()));
         return jsonObject;
     }
 }
