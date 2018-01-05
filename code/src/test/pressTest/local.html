@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="utf-8">
+    <title>本地压力测试</title>
+</head>
+<body>
+<!-- 为ECharts准备一个具备大小（宽高）的Dom -->
+<div id="main" style="height:400px;width: 1000px"></div>
+<!-- ECharts单文件引入 -->
+<script src="http://echarts.baidu.com/build/dist/echarts.js"></script>
+<script type="text/javascript">
+    require.config({
+        paths: {
+            echarts: 'http://echarts.baidu.com/build/dist'
+        }
+    });
+    require(
+        [
+            'echarts',
+            'echarts/chart/line' // 使用柱状图就加载bar模块，按需加载
+        ],
+        function (ec) {
+            // 基于准备好的dom，初始化echarts图表
+            var myChart = ec.init(document.getElementById('main'));
+
+            var option = {
+                title: {
+                    show: true,
+                    text: 'Local machine press test',
+                    x: 'center'
+                },
+                tooltip: {
+                    trigger: 'axis'
+                },
+                legend: {
+                    data: ['Average per request time', '80% per request time', '50% per request time'],
+                    x: 'right',
+                    y: '30px'
+                },
+                toolbox: {
+                    show: false,
+                    feature: {
+                        mark: {show: true},
+                        dataView: {show: true, readOnly: false},
+                        magicType: {show: true, type: ['line', 'bar', 'stack', 'tiled']},
+                        restore: {show: true},
+                        saveAsImage: {show: true}
+                    }
+                },
+                calculable: true,
+                xAxis: [
+                    {
+                        type: 'category',
+                        name: 'Concurrency',
+                        boundaryGap: false,
+                        data: ['100', '200', '300', '400', '500', '600', '700', '800', '900', '1000']
+                    }
+                ],
+                yAxis: [
+                    {
+                        type: 'value',
+                        name: 'Time per request / ms'
+                    }
+                ],
+                series : [
+                    {
+                        name: 'Average per request time',
+                        type:'line',
+                        data:[262, 486, 548, 737, 1062, 1233, 1456, 1819, 2026, 2043]
+                    },
+                    {
+                        name: '80% per request time',
+                        type:'line',
+                        data:[329, 654, 751, 1024, 1524, 1705, 2114, 2754, 2955, 2925]
+                    },
+                    {
+                        name: '50% per request time',
+                        type:'line',
+                        data:[220, 446, 486, 616, 809, 896, 1040, 1200, 1488, 1520]
+                    }
+                ]
+            };
+            myChart.setOption(option);
+        }
+    );
+</script>
+</body>
