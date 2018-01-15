@@ -14,7 +14,10 @@ POST  /api/common/loginAbutment
 + userType: 是用户类型，包括学生(student)和教师(staff)两种,通过userType可以判断用户是教师用户还是学生用户，不同用户类型返回的信息不同；
 + signature: 是标志信息，由用户基本信息和私有令牌按一定的规则拼接，再用SHA256算法进行签名生成; 
 
-`signature=SHA256(email||userName||userType||private\_token)`
+                 `signature=SHA256(email||userName||userType||private\_token)`
+
+
+![](../pictures/assessment-inter.png)
 
 互评系统在接收到Open edX的互评组件的POST请求之后，互评系统把接收到的email、userName和userType参数的值与互评系统自身private\_token进行拼接，也进行SHA256操作，校验signature。如果signature相同则证明该HTTP请求是来自Open edX的合法请求，互评系统随机生成一个唯一的uuid作为HTTP响应，同时以uuid为key将用户信息放到redis中，并设置uuid的过期时间为3s。由于整个对接过程基本在一瞬间就能完成，因此这里过期时间设置的短一点可以防止非法用户通过抓包拿到数据后进行重放攻击。
 
