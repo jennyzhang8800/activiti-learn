@@ -146,3 +146,7 @@ Open edX收到来自互评系统的HTPP响应之后，携带uuid向互评系统�
 |POST | /api/user/commitJudgementInfo  |提交互评结果|
 |POST | /api/user/ackTeacherVerify |申请让老师批改作业|
 |POST | /api/user/finishTeacherVerifyTask  |教师完成任务并提交|
+
+## 接口源码
+
+[UserController.java](..//code/activiti-workflow/src/main/java/com/activiti/controller/restController/UserController.java)
