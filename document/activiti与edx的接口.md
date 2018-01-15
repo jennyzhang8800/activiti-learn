@@ -33,6 +33,8 @@ Open edX收到来自互评系统的HTPP响应之后，携带uuid向互评系统�
 
 返回：提交是否成功；
 
+![](../pictures/commitWork.png)
+
 启动流程的Activiti接口为：runtimeService.startProcessInstanceByKey。 同时会把作业信息提交到Gitlab。
 
 ### 3. 查询互评任务
@@ -45,6 +47,8 @@ Open edX收到来自互评系统的HTPP响应之后，携带uuid向互评系统�
 
 返回：json对象（互评任务列表）
 
+![](../pictures/selectWorkListToJudge.png)
+
 ### 4. 提交互评结果
 
 ```POST  /api/user/commitJudgementInfo ```
@@ -54,15 +58,19 @@ Open edX收到来自互评系统的HTPP响应之后，携带uuid向互评系统�
 
 返回：提交是否成功。
 
+![](../pictures/commitJudgementInfo.png)
+
 调用该接口时首先检查是否参与过互评，然后对互评结果进行封装并提交到Gitlab，插入互评流水，更新该用户参与互评的时间，调用Activiti的taskService.complete(taskId)接口完成该用户的互评任务。
 
 ### 5. 查看成绩
 
-```GET /api/user/selectStudentGrade 学生成绩查询```
+```GET /api/user/selectStudentGrade ```
 
 参数：email
 
 返回：成绩列表
+
+![](../pictures/selectStudentGrade.png)
 
 ```
 
@@ -81,6 +89,8 @@ Open edX收到来自互评系统的HTPP响应之后，携带uuid向互评系统�
 
 返回：是否允许成绩审核
 
+![](../pictures/ackTeacherVerify.png)
+
 首先判断该作业是否是允许进行成绩申诉的流程，其次判断是否己被老师批改过作业、该用户是否参加过互评（没有参加互评则不能申请成绩审核）、是否己经申请过成绩审核。
 
 经过上述判断后，只有满足成绩审核条件，才启动教师审查流程。runtimeService.startProcessInstanceByKey("verifyTask", businessKey, variables);
@@ -92,6 +102,8 @@ Open edX收到来自互评系统的HTPP响应之后，携带uuid向互评系统�
 参数：email
 
 返回：待批改作业列表
+
+![](../pictures/selectAllTeacherTask.png)
 
 首先根据email判断是否是教师，如果是教师才可以调用查询接口。
 
@@ -110,7 +122,9 @@ Open edX收到来自互评系统的HTPP响应之后，携带uuid向互评系统�
 参数：taskId：任务Id; courseCode:题号； emailAddress:邮件；grade：成绩
 
 返回：批改是否成功
-   
+
+![](../pictures/finishTeacherVerifyTask.png)
+
 调用Activiti的完成任务接口taskService.complete(taskId)完成教师的任务。根据参数获得学生作业信息，更新其在Gitlab中的成绩。
 
 ## 接口列表
