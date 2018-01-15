@@ -47,7 +47,7 @@ Open edX收到来自互评系统的HTPP响应之后，携带uuid向互评系统�
 
 返回：json对象（互评任务列表）
 
-![](../pictures/selectWorkListToJudge.png)
+![](../pictures/selectWorkListToJudge2.png)
 
 ### 4. 提交互评结果
 
