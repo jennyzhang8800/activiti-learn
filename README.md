@@ -6,8 +6,10 @@
 # 项目简介
 
 + code文件夹下是项目源代码
-  + activiti-workflow：基于activiti的互评系统源码。maven项目，开发语言为java
-  + pressTest:压力测试源码
+
+    activiti-workflow：基于activiti的互评系统源码。maven项目，开发语言为java
+   
+    pressTest:压力测试源码
   
 + doument文件夹下是文档整理，下面的目录可以快速索引
 
